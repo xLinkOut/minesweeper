@@ -5,13 +5,16 @@ from random import randint
 # Create a window with Tkinter library
 window = Tk()
 
+# Boolean variable to print statements if in debug mode
+debug = False
+
 # Number of rows
 row = 16 # Fixed size, for now
 # Number of columns
 col = 16
 # Number of bombs
 bombs = (row*col) // 4 # Maybe divider (4) can be setted according to the difficoult chosen 
-print("Row:",row,"Col:",col,"Bombs:",bombs)
+print("Row:",row,"Col:",col,"Bombs:",bombs) if debug else None
 
 # Create a board as a board filled with 0
 board = zeros((row,col),dtype=int)
@@ -47,8 +50,8 @@ while(bombs):
         # Append bomb coord into bombsCoord list
         bombsCoord.append((x,y))
     bombs-=1
-print("Effective bombs:",len(bombsCoord),"\n")
-print(board,"\n")
+print("Effective bombs:",len(bombsCoord),"\n") if debug else None
+print(board,"\n") if debug else None
 
 # Fill other cells with numbers
 # Scan rows
@@ -78,7 +81,7 @@ for r in range(row):
     for c in range(col):
         # Append current cell's value to the linearizedBoard array
         linearizedBoard.append(board[r][c])
-print(linearizedBoard,"\n")
+print(linearizedBoard,"\n") if debug else None
 
 # Update button's image when a cell is pressed or flagged
 def updateImage(button,number):
