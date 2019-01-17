@@ -83,13 +83,21 @@ print(linearizedBoard,"\n")
 
 # Update button's image when a cell is pressed or flagged
 def updateImage(button,number):
-    # If is a bomb
-    if number == -1:
-        button.configure(image=spriteBomb,width=30,height=30)
-    # Else update the button image with a number or blank image
+    # Idk why this is used for, but w/out doesn't work. I'll read docs
+    if button in cellsList.values():
+        # If is a bomb
+        if number == -1:
+            button.configure(image=spriteBomb,width=30,height=30)
+        # Else update the button image with a number or blank image
+        else:
+            button.configure(image=spriteNumbers[number],width=30,height=30)
     else:
-        button.configure(image=spriteNumbers[number],width=30,height=30)
-
+        # If is a bomb
+        if number == -1:
+            button.widget.configure(image=spriteBomb,width=30,height=30)
+        # Else update the button image with a number or blank image
+        else:
+            button.widget.configure(image=spriteNumbers[number],width=30,height=30)
 # Called when mouse left-click has been pressed over a cell
 # Open the pressed cell
 def leftClick(cellPressed,x,y):
