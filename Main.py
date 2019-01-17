@@ -101,6 +101,53 @@ def updateImage(button,number):
         else:
             button.widget.configure(image=spriteNumbers[number],width=30,height=30)
 
+# When a blank cell is pressed, open nearby blank cells
+def openBlankCells(x,y):
+    # If current cell is a blank cell, return (first cell is always a blank cell)
+    # Check for out of bound    
+    if x < 0 or y < 0 or x >= row or y >= row:
+        return
+    # If cell is not blank, return 
+    if board[x][y] != 0:
+        return
+    # Top left
+    if x-1 >= 0 and y-1 >=0 and board[x-1][y-1] == 0:
+        updateImage(cellsList[x-1,y-1],0)
+    # Top top
+    if x-1 >= 0 and y >= 0 and board[x-1][y] == 0:
+        updateImage(cellsList[x-1,y],0)
+    # Top right
+    if x-1 >= 0 and y+1 < col and board[x-1][y+1] == 0:
+        updateImage(cellsList[x-1,y+1],0)
+    
+    # Same left
+    if x >= 0 and y-1 >= 0 and board[x][y-1] == 0:
+        updateImage(cellsList[x,y-1],0)
+    # Same right
+    if x >= 0 and y+1 < col and board[x][y+1] == 0:
+        updateImage(cellsList[x,y+1],0)
+
+    # Bottom left
+    if x+1 < row and y-1 >= 0 and board[x+1][y-1] == 0:
+        updateImage(cellsList[x+1,y-1],0)
+    # Bottom bottom
+    if x+1 < row and y >= 0 and board[x+1][y] == 0:
+        updateImage(cellsList[x+1,y],0)
+    # Bottom right
+    if x+1 < row and y+1 < col and board[x+1][y+1] == 0:
+        updateImage(cellsList[x+1,y+1],0)
+
+'''
+    openBlankCells(x+1,y)
+    openBlankCells(x+1,y+1)
+    openBlankCells(x,y-1)
+    openBlankCells(x,y+1)
+    openBlankCells(x-1,y-1)
+    openBlankCells(x-1,y)
+    openBlankCells(x-1,y+1)
+'''
+
+
 # Called when mouse left-click has been pressed over a cell
 # Open the pressed cell
 def leftClick(cellPressed,x,y):
@@ -118,6 +165,12 @@ def leftClick(cellPressed,x,y):
             messagebox.showinfo("Game over!","You lost :c")
             # Then exit
             exit() # Until create a menu
+        # If pressed cell is a blank cell
+        elif board[x][y] == 0:
+            # Update image in current cell with blank sprite
+            updateImage(cellPressed,0)
+            # Recursively open nearby blank cells
+            openBlankCells(x,y)
         else:
             # If pressed cell is not a bomb, update cell's image
             updateImage(cellPressed,board[x][y])
@@ -161,8 +214,8 @@ for r in range(row):
 window.mainloop()
 
 # TODO:
-#   Function that open nearby blank cells when a blank cell is pressed
-#   Explain why updateImage doesnt work without distinguish between widget or just .configure method
+#   * Function that open nearby blank cells when a blank cell is pressed
+#   * Explain why updateImage doesnt work without distinguish between widget or just .configure method
 #   Add sprite for number 6,7,8
 #   Fix border key error
 #   Find a formula to calculate better how meny bombs has to spawn
