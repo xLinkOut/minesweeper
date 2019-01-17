@@ -98,6 +98,7 @@ def updateImage(button,number):
         # Else update the button image with a number or blank image
         else:
             button.widget.configure(image=spriteNumbers[number],width=30,height=30)
+
 # Called when mouse left-click has been pressed over a cell
 # Open the pressed cell
 def leftClick(cellPressed,x,y):
@@ -154,3 +155,14 @@ for r in range(row):
 
 # Popup the window
 window.mainloop()
+
+# TODO:
+#   Function that open nearby blank cells when a blank cell is pressed
+#   Add handler for right-click
+#   Explain why updateImage doesnt work without distinguish between widget or just .configure method
+#   Add sprite for number 6,7,8
+#   Fix border key error
+#   Find a formula to calculate better how meny bombs has to spawn
+#   Create some kind of menu with rows and columns input, and difficulty
+#   Add a timer
+#   Add some kind of scoring function
