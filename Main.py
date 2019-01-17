@@ -79,6 +79,17 @@ for r in range(row):
         linearizedBoard.append(board[r][c])
 print(linearizedBoard,"\n")
 
+# --Functions
+
+# Function called when mouse left-click has been pressed over a cell
+def leftClick(cellPressed,x,y):
+    # If the pressed cell is not flagged
+    if (x,y) not in cellsFlagged:
+        # If pressed cell contain a bomb
+        if board[x][y] == -1:
+            # Game over
+            cellPressed.widget.configure(image=spriteBomb,width=30,height=30)
+
 # Dictionary that contains all the cells as Tkinter.Button object
 cellsList = {}
 # Scan rows
@@ -87,8 +98,13 @@ for r in range(row):
     for c in range(col):
         # Create a button object with normal image, width and height equals to 30
         button = Button(window,image=spriteNormal,width=30,height=30)
+        # Bind an handler for mouse left-click on a cell that call leftClick funcion with event obj, x and y coord
+        button.bind("<Button-1>",lambda event,x=r,y=c : leftClick(event,x,y))
         # Grid the button in row r and column c
         button.grid(row=r,column=c)
         # Append the button into cellsList with indexing (x,y)
         # :to access this -> cellsList[3,4] -> button in coordinates x=3,y=4
         cellsList[x,y] = button
+
+# Popup the window
+window.mainloop()
