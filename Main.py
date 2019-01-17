@@ -32,7 +32,8 @@ spriteNumbers =[
     PhotoImage(file = "res/2.png"),
     PhotoImage(file = "res/3.png"),
     PhotoImage(file = "res/4.png"),
-    PhotoImage(file = "res/5.png")
+    PhotoImage(file = "res/5.png"),
+    PhotoImage(file = "res/6.png")
 ]
 
 # Insert bombs into the board
