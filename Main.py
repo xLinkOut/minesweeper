@@ -91,6 +91,7 @@ def updateImage(button,number):
         button.configure(image=spriteNumbers[number],width=30,height=30)
 
 # Called when mouse left-click has been pressed over a cell
+# Open the pressed cell
 def leftClick(cellPressed,x,y):
     # If the pressed cell is not flagged
     if (x,y) not in cellsFlagged:
@@ -109,6 +110,22 @@ def leftClick(cellPressed,x,y):
         else:
             # If pressed cell is not a bomb, update cell's image
             updateImage(cellPressed,board[x][y])
+
+# Called when mouse right-click has been pressed over a cell
+# Flag the pressed cell
+def rightClick(cellPressed,x,y):
+    # If cell is already flagged, remove the flag
+    if (x,y) in cellsFlagged:
+        # Remove cell from cellsFlagged list
+        cellsFlagged.remove((x,y))
+        # Update image back to normal sprite
+        cellPressed.configure(image=spriteNormal,width=30,height=30)
+    # If is not flagged, flag the cell
+    else:
+        # Insert flagged cell coord into cellsFlagged list
+        cellsFlagged.append((x,y))
+        # Update cell's image with flag sprite
+        cellPressed.configure(image=spriteFlag,width=30,height=30)
 
 # Dictionary that contains all the cells as Tkinter.Button object
 cellsList = {}
