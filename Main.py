@@ -81,7 +81,16 @@ print(linearizedBoard,"\n")
 
 # --Functions
 
-# Function called when mouse left-click has been pressed over a cell
+# Update button's image when a cell is pressed or flagged
+def updateImage(button,number):
+    # If is a bomb
+    if number == -1:
+        button.configure(image=spriteBomb,width=30,height=30)
+    # Else update the button image with a number or blank image
+    else:
+        button.configure(image=spriteNumbers[number],width=30,height=30)
+
+# Called when mouse left-click has been pressed over a cell
 def leftClick(cellPressed,x,y):
     # If the pressed cell is not flagged
     if (x,y) not in cellsFlagged:
@@ -89,9 +98,16 @@ def leftClick(cellPressed,x,y):
         if board[x][y] == -1:
             # Game over
             cellPressed.widget.configure(image=spriteBomb,width=30,height=30)
-
+            for index,button in enumerate(cellsList.values()):
+                updateImage(button,linearizedBoard[index])
+            messagebox.showinfo("Game over!","You lost :c")
+            exit() # Until create a menu
+        else:
+            updateImage(cellPressed,board[x][y])
+            
 # Dictionary that contains all the cells as Tkinter.Button object
 cellsList = {}
+
 # Scan rows
 for r in range(row):
     # For each row, scan columns
@@ -104,7 +120,7 @@ for r in range(row):
         button.grid(row=r,column=c)
         # Append the button into cellsList with indexing (x,y)
         # :to access this -> cellsList[3,4] -> button in coordinates x=3,y=4
-        cellsList[x,y] = button
+        cellsList[r,c] = button
 
 # Popup the window
 window.mainloop()
