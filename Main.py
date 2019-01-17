@@ -51,9 +51,9 @@ print(board,"\n")
 
 # Fill other cells with numbers
 # Scan rows
-for x in range(0,row-1):
+for x in range(row-1):
     # For each row, scan columns
-    for y in range(0,col-1):
+    for y in range(col-1):
         if board[x][y] == -1:
             # Is a bomb, add +1 to the adjacent cells, in a sub-board 3x3 with current cell as center
             # Row up
@@ -72,9 +72,23 @@ print(board,"\n")
 # Linearize board to a 1D array
 linearizedBoard = []
 # Scan rows
-for r in range(0,row):
+for r in range(row):
     # For each row, scan columns
-    for c in range(0,col):
+    for c in range(col):
         # Append current cell's value to the linearizedBoard array
         linearizedBoard.append(board[r][c])
 print(linearizedBoard,"\n")
+
+# Dictionary that contains all the cells as Tkinter.Button object
+cellsList = {}
+# Scan rows
+for r in range(row):
+    # For each row, scan columns
+    for c in range(col):
+        # Create a button object with normal image, width and height equals to 30
+        button = Button(window,image=spriteNormal,width=30,height=30)
+        # Grid the button in row r and column c
+        button.grid(row=r,column=c)
+        # Append the button into cellsList with indexing (x,y)
+        # :to access this -> cellsList[3,4] -> button in coordinates x=3,y=4
+        cellsList[x,y] = button
