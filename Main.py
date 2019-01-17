@@ -13,7 +13,7 @@ col = 16
 bombs = (row*col) // 4 # Maybe divider (4) can be setted according to the difficoult chosen 
 print("Row:",row,"Col:",col,"Bombs:",bombs)
 
-# Create a board as a matrix filled with 0
+# Create a board as a board filled with 0
 board = zeros((row,col),dtype=int)
 
 # List of current flagged cell
@@ -48,3 +48,33 @@ while(bombs):
     bombs-=1
 print("Effective bombs:",len(bombsCoord),"\n")
 print(board,"\n")
+
+# Fill other cells with numbers
+# Scan rows
+for x in range(0,row-1):
+    # For each row, scan columns
+    for y in range(0,col-1):
+        if board[x][y] == -1:
+            # Is a bomb, add +1 to the adjacent cells, in a sub-board 3x3 with current cell as center
+            # Row up
+            board[x-1][y-1] = (board[x-1][y-1] + 1) if board[x-1][y-1] != -1 else board[x-1][y-1]
+            board[x-1][y] = (board[x-1][y] + 1) if board[x-1][y] != -1 else board[x-1][y] 
+            board[x-1][y+1] = (board[x-1][y+1] + 1) if board[x-1][y+1] != -1 else board[x-1][y+1] 
+            # Same row
+            board[x][y-1] = (board[x][y-1] + 1) if board[x][y-1] != -1 else board[x][y-1] 
+            board[x][y+1] = (board[x][y+1] + 1) if board[x][y+1] != -1 else board[x][y+1] 
+            # Row down
+            board[x+1][y-1] = (board[x+1][y-1] + 1) if board[x+1][y-1] != -1 else board[x+1][y-1] 
+            board[x+1][y] = (board[x+1][y] + 1) if board[x+1][y] != -1 else board[x+1][y] 
+            board[x+1][y+1] = (board[x+1][y+1] + 1) if board[x+1][y+1] != -1 else board[x+1][y+1] 
+print(board,"\n")
+
+# Linearize board to a 1D array
+linearizedBoard = []
+# Scan rows
+for r in range(0,row):
+    # For each row, scan columns
+    for c in range(0,col):
+        # Append current cell's value to the linearizedBoard array
+        linearizedBoard.append(board[r][c])
+print(linearizedBoard,"\n")
