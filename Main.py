@@ -10,8 +10,8 @@ row = 16 # Fixed size, for now
 # Number of columns
 col = 16
 # Number of bombs
-bombs = (row*col) // 4
-print("Row:",row,"Col:",col,"Bombs:",bombs,end="\n\n")
+bombs = (row*col) // 4 # Maybe divider (4) can be setted according to the difficoult chosen 
+print("Row:",row,"Col:",col,"Bombs:",bombs)
 
 # Create a board as a matrix filled with 0
 board = zeros((row,col),dtype=int)
@@ -46,4 +46,5 @@ while(bombs):
         # Append bomb coord into bombsCoord list
         bombsCoord.append((x,y))
     bombs-=1
+print("Effective bombs:",len(bombsCoord),"\n")
 print(board,"\n")
