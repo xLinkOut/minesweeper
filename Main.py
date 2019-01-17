@@ -79,8 +79,6 @@ for r in range(row):
         linearizedBoard.append(board[r][c])
 print(linearizedBoard,"\n")
 
-# --Functions
-
 # Update button's image when a cell is pressed or flagged
 def updateImage(button,number):
     # Idk why this is used for, but w/out doesn't work. I'll read docs
@@ -147,6 +145,8 @@ for r in range(row):
         button = Button(window,image=spriteNormal,width=30,height=30)
         # Bind an handler for mouse left-click on a cell that call leftClick funcion with event obj, x and y coord
         button.bind("<Button-1>",lambda event,x=r,y=c : leftClick(event,x,y))
+        # Bind an handler for mouse right-click on a cell that call rightClick function with event obj, x and y coord
+        button.bind("Button-3>", lambda event,x=r,y=c : rightClick(event,x,y))
         # Grid the button in row r and column c
         button.grid(row=r,column=c)
         # Append the button into cellsList with indexing (x,y)
@@ -158,7 +158,6 @@ window.mainloop()
 
 # TODO:
 #   Function that open nearby blank cells when a blank cell is pressed
-#   Add handler for right-click
 #   Explain why updateImage doesnt work without distinguish between widget or just .configure method
 #   Add sprite for number 6,7,8
 #   Fix border key error
