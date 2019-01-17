@@ -97,14 +97,19 @@ def leftClick(cellPressed,x,y):
         # If pressed cell contain a bomb
         if board[x][y] == -1:
             # Game over
+            # Update the current cell's image with a bomb
             cellPressed.widget.configure(image=spriteBomb,width=30,height=30)
+            # Then openup all the remaining cells
             for index,button in enumerate(cellsList.values()):
                 updateImage(button,linearizedBoard[index])
+            # Show a message box (here maybe insert a time/score, later)
             messagebox.showinfo("Game over!","You lost :c")
+            # Then exit
             exit() # Until create a menu
         else:
+            # If pressed cell is not a bomb, update cell's image
             updateImage(cellPressed,board[x][y])
-            
+
 # Dictionary that contains all the cells as Tkinter.Button object
 cellsList = {}
 
