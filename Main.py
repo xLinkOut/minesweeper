@@ -13,7 +13,7 @@ row = 16 # Fixed size, for now
 # Number of columns
 col = 16
 # Number of bombs
-bombs = (row*col) // 4 # Maybe divider (4) can be setted according to the difficoult chosen 
+bombs = (row*col) // 10 #4 # Maybe divider (4) can be setted according to the difficoult chosen 
 print("Row:",row,"Col:",col,"Bombs:",bombs) if debug else None
 
 # Create a board as a board filled with 0
@@ -100,10 +100,12 @@ def updateImage(button,number):
         # Else update the button image with a number or blank image
         else:
             button.widget.configure(image=spriteNumbers[number],width=30,height=30)
-
 # When a blank cell is pressed, open nearby blank cells
 def openBlankCells(x,y):
-    # If current cell is a blank cell, return (first cell is always a blank cell)
+    # Didnt work, need another cell proprety to know if already revealed or not
+    pass
+    
+    '''# If current cell is a blank cell, return (first cell is always a blank cell)
     # Check for out of bound    
     if x < 0 or y < 0 or x >= row or y >= row:
         return
@@ -136,8 +138,7 @@ def openBlankCells(x,y):
     # Bottom right
     if x+1 < row and y+1 < col and board[x+1][y+1] == 0:
         updateImage(cellsList[x+1,y+1],0)
-
-'''
+    
     openBlankCells(x+1,y)
     openBlankCells(x+1,y+1)
     openBlankCells(x,y-1)
@@ -145,13 +146,13 @@ def openBlankCells(x,y):
     openBlankCells(x-1,y-1)
     openBlankCells(x-1,y)
     openBlankCells(x-1,y+1)
-'''
+    '''
 
 
 # Called when mouse left-click has been pressed over a cell
 # Open the pressed cell
 def leftClick(cellPressed,x,y):
-    # If the pressed cell is not flagged
+    # If pressed cell is not flagged
     if (x,y) not in cellsFlagged:
         # If pressed cell contain a bomb
         if board[x][y] == -1:
@@ -170,7 +171,7 @@ def leftClick(cellPressed,x,y):
             # Update image in current cell with blank sprite
             updateImage(cellPressed,0)
             # Recursively open nearby blank cells
-            openBlankCells(x,y)
+            #openBlankCells(x,y)
         else:
             # If pressed cell is not a bomb, update cell's image
             updateImage(cellPressed,board[x][y])
