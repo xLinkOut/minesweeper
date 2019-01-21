@@ -19,6 +19,8 @@ print("Row:",row,"Col:",col,"Bombs:",bombs) if debug else None
 # Create a board as a board filled with 0
 board = zeros((row,col),dtype=int)
 
+marked = zeros((row,col),dtype=bool)
+
 # List of current flagged cell
 cellsFlagged = []
 
@@ -100,55 +102,20 @@ def updateImage(button,number):
         # Else update the button image with a number or blank image
         else:
             button.widget.configure(image=spriteNumbers[number],width=30,height=30)
+
 # When a blank cell is pressed, open nearby blank cells
 def openBlankCells(x,y):
-    # Didnt work, need another cell proprety to know if already revealed or not
-    pass
-    
-    '''# If current cell is a blank cell, return (first cell is always a blank cell)
-    # Check for out of bound    
-    if x < 0 or y < 0 or x >= row or y >= row:
-        return
-    # If cell is not blank, return 
-    if board[x][y] != 0:
-        return
-    # Top left
-    if x-1 >= 0 and y-1 >=0 and board[x-1][y-1] == 0:
-        updateImage(cellsList[x-1,y-1],0)
-    # Top top
-    if x-1 >= 0 and y >= 0 and board[x-1][y] == 0:
-        updateImage(cellsList[x-1,y],0)
-    # Top right
-    if x-1 >= 0 and y+1 < col and board[x-1][y+1] == 0:
-        updateImage(cellsList[x-1,y+1],0)
-    
-    # Same left
-    if x >= 0 and y-1 >= 0 and board[x][y-1] == 0:
-        updateImage(cellsList[x,y-1],0)
-    # Same right
-    if x >= 0 and y+1 < col and board[x][y+1] == 0:
-        updateImage(cellsList[x,y+1],0)
+    if x >= 0 and x < row and y >= 0 and y < col:
+        neighbour = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+        for n in neighbour:
+            if n[0] >= 0 and n[0] < row and n[1] >= 0 and n[1] < col:
+                if not marked[n[0]][n[1]] and (n not in cellsFlagged):
+                    updateImage(cellsList[n],board[n[0]][n[1]])
+                    marked[x][y] = True    
+                    if board[n[0]][n[1]] == 0:
+                        openBlankCells(n[0],n[1])
 
-    # Bottom left
-    if x+1 < row and y-1 >= 0 and board[x+1][y-1] == 0:
-        updateImage(cellsList[x+1,y-1],0)
-    # Bottom bottom
-    if x+1 < row and y >= 0 and board[x+1][y] == 0:
-        updateImage(cellsList[x+1,y],0)
-    # Bottom right
-    if x+1 < row and y+1 < col and board[x+1][y+1] == 0:
-        updateImage(cellsList[x+1,y+1],0)
-    
-    openBlankCells(x+1,y)
-    openBlankCells(x+1,y+1)
-    openBlankCells(x,y-1)
-    openBlankCells(x,y+1)
-    openBlankCells(x-1,y-1)
-    openBlankCells(x-1,y)
-    openBlankCells(x-1,y+1)
-    '''
-
-
+            
 # Called when mouse left-click has been pressed over a cell
 # Open the pressed cell
 def leftClick(cellPressed,x,y):
@@ -171,11 +138,13 @@ def leftClick(cellPressed,x,y):
             # Update image in current cell with blank sprite
             updateImage(cellPressed,0)
             # Recursively open nearby blank cells
-            #openBlankCells(x,y)
+            openBlankCells(x,y)
         else:
             # If pressed cell is not a bomb, update cell's image
             updateImage(cellPressed,board[x][y])
 
+            marked[x][y] = True
+    
 # Called when mouse right-click has been pressed over a cell
 # Flag the pressed cell
 def rightClick(cellPressed,x,y):
@@ -184,17 +153,16 @@ def rightClick(cellPressed,x,y):
         # Remove cell from cellsFlagged list
         cellsFlagged.remove((x,y))
         # Update image back to normal sprite
-        cellPressed.configure(image=spriteNormal,width=30,height=30)
+        cellPressed.widget.configure(image=spriteNormal,width=30,height=30)
     # If is not flagged, flag the cell
     else:
         # Insert flagged cell coord into cellsFlagged list
         cellsFlagged.append((x,y))
         # Update cell's image with flag sprite
-        cellPressed.configure(image=spriteFlag,width=30,height=30)
+        cellPressed.widget.configure(image=spriteFlag,width=30,height=30)
 
 # Dictionary that contains all the cells as Tkinter.Button object
 cellsList = {}
-
 # Scan rows
 for r in range(row):
     # For each row, scan columns
@@ -204,7 +172,7 @@ for r in range(row):
         # Bind an handler for mouse left-click on a cell that call leftClick funcion with event obj, x and y coord
         button.bind("<Button-1>",lambda event,x=r,y=c : leftClick(event,x,y))
         # Bind an handler for mouse right-click on a cell that call rightClick function with event obj, x and y coord
-        button.bind("Button-3>", lambda event,x=r,y=c : rightClick(event,x,y))
+        button.bind("<Button-3>", lambda event,x=r,y=c : rightClick(event,x,y))
         # Grid the button in row r and column c
         button.grid(row=r,column=c)
         # Append the button into cellsList with indexing (x,y)
