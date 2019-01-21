@@ -111,7 +111,7 @@ def openBlankCells(x,y):
             if n[0] >= 0 and n[0] < row and n[1] >= 0 and n[1] < col:
                 if not marked[n[0]][n[1]] and (n not in cellsFlagged):
                     updateImage(cellsList[n],board[n[0]][n[1]])
-                    marked[x][y] = True    
+                    marked[n[0]][n[1]] = True    
                     if board[n[0]][n[1]] == 0:
                         openBlankCells(n[0],n[1])
 
@@ -149,6 +149,8 @@ def leftClick(cellPressed,x,y):
 # Flag the pressed cell
 def rightClick(cellPressed,x,y):
     # If cell is already flagged, remove the flag
+    print(cellsFlagged)
+    print(marked)
     if (x,y) in cellsFlagged:
         # Remove cell from cellsFlagged list
         cellsFlagged.remove((x,y))
@@ -156,10 +158,13 @@ def rightClick(cellPressed,x,y):
         cellPressed.widget.configure(image=spriteNormal,width=30,height=30)
     # If is not flagged, flag the cell
     else:
-        # Insert flagged cell coord into cellsFlagged list
-        cellsFlagged.append((x,y))
-        # Update cell's image with flag sprite
-        cellPressed.widget.configure(image=spriteFlag,width=30,height=30)
+        print(x,y)
+        print(marked[x][y])
+        if not marked[x][y]:
+            # Insert flagged cell coord into cellsFlagged list
+            cellsFlagged.append((x,y))
+            # Update cell's image with flag sprite
+            cellPressed.widget.configure(image=spriteFlag,width=30,height=30)
 
 # Dictionary that contains all the cells as Tkinter.Button object
 cellsList = {}
