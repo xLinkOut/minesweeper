@@ -13,12 +13,12 @@ row = 16 # Fixed size, for now
 # Number of columns
 col = 16
 # Number of bombs
-bombs = (row*col) // 10 #4 # Maybe divider (4) can be setted according to the difficoult chosen 
+bombs = (row*col) // 4 # Maybe divider (4) can be setted according to the difficoult chosen 
 print("Row:",row,"Col:",col,"Bombs:",bombs) if debug else None
 
 # Create a board as a board filled with 0
 board = zeros((row,col),dtype=int)
-
+# Create a matrix to keep track of already opened cells, filled with False
 marked = zeros((row,col),dtype=bool)
 
 # List of current flagged cell
@@ -27,7 +27,7 @@ cellsFlagged = []
 # List of bombs coordinates
 bombsCoord = []
 
-# Image imported as Tk PhotoImage object
+# Images imported as Tk PhotoImage objects
 spriteBomb = PhotoImage(file = "res/bomb.png")
 spriteFlag = PhotoImage(file = "res/flagged.png")
 spriteNormal = PhotoImage(file = "res/normal.png")
@@ -43,36 +43,54 @@ spriteNumbers =[
 
 # Insert bombs into the board
 while(bombs):
-    # Leave border without bombs for KeyError, fix later
-    #x,y = randint(0,row-1),randint(0,col-1)    
-    x,y = randint(1,row-2),randint(1,col-2)
+    # Leave border without bombs for KeyError, fix later    
+    #x,y = randint(1,row-2),randint(1,col-2)
+    
+    # Seems to work...
+    x,y = randint(0,row-1),randint(0,col-1)    
+    
     if board[x][y] == 0:
         # Set a bomb as -1 value
         board[x][y] = -1
         # Append bomb coord into bombsCoord list
         bombsCoord.append((x,y))
     bombs-=1
+
 print("Effective bombs:",len(bombsCoord),"\n") if debug else None
 print(board,"\n") if debug else None
 
+# Return True if x and y are valid coordinates, means that (0 =< x < row) and (0 =< y < col)
+def areValidCoords(x,y):
+    return x >= 0 and y >= 0 and x < row and y < col
+
 # Fill other cells with numbers
 # Scan rows
-for x in range(row-1):
+for x in range(row):
     # For each row, scan columns
-    for y in range(col-1):
+    for y in range(col):
+        # If is a bomb
         if board[x][y] == -1:
-            # Is a bomb, add +1 to the adjacent cells, in a sub-board 3x3 with current cell as center
+            # List that cointains all nearby cells, in a 3x3 sub-matrix            
+            neighbor = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+            # For each neighbor            
+            for n in neighbor:
+                # If (x,y) is valid coords and cell is not a bomb
+                if areValidCoords(n[0],n[1]) and board[n[0]][n[1]] != -1:
+                    # Increase by 1
+                    board[n[0]][n[1]] += 1
+            '''
             # Row up
-            board[x-1][y-1] = (board[x-1][y-1] + 1) if board[x-1][y-1] != -1 else board[x-1][y-1]
-            board[x-1][y] = (board[x-1][y] + 1) if board[x-1][y] != -1 else board[x-1][y] 
-            board[x-1][y+1] = (board[x-1][y+1] + 1) if board[x-1][y+1] != -1 else board[x-1][y+1] 
+            board[x-1][y-1] = (board[x-1][y-1] + 1) if check(x-1,y-1) and board[x-1][y-1] != -1 else board[x-1][y-1]
+            board[x-1][y] = (board[x-1][y] + 1) if check(x-1,y) and board[x-1][y] != -1 else board[x-1][y] 
+            board[x-1][y+1] = (board[x-1][y+1] + 1) if check(x-1,y+1) and board[x-1][y+1] != -1 else board[x-1][y+1] 
             # Same row
-            board[x][y-1] = (board[x][y-1] + 1) if board[x][y-1] != -1 else board[x][y-1] 
-            board[x][y+1] = (board[x][y+1] + 1) if board[x][y+1] != -1 else board[x][y+1] 
+            board[x][y-1] = (board[x][y-1] + 1) if check(x,y-1) and board[x][y-1] != -1 else board[x][y-1] 
+            board[x][y+1] = (board[x][y+1] + 1) if check(x,y+1) and board[x][y+1] != -1 else board[x][y+1] 
             # Row down
-            board[x+1][y-1] = (board[x+1][y-1] + 1) if board[x+1][y-1] != -1 else board[x+1][y-1] 
-            board[x+1][y] = (board[x+1][y] + 1) if board[x+1][y] != -1 else board[x+1][y] 
-            board[x+1][y+1] = (board[x+1][y+1] + 1) if board[x+1][y+1] != -1 else board[x+1][y+1] 
+            board[x+1][y-1] = (board[x+1][y-1] + 1) if check(x+1,y-1) and board[x+1][y-1] != -1 else board[x+1][y-1] 
+            board[x+1][y] = (board[x+1][y] + 1) if check(x+1,y) and board[x+1][y] != -1 else board[x+1][y] 
+            board[x+1][y+1] = (board[x+1][y+1] + 1) if check(x+1,y+1) and board[x+1][y+1] != -1 else board[x+1][y+1] 
+            '''
 print(board,"\n")
 
 # Linearize board to a 1D array
@@ -105,14 +123,23 @@ def updateImage(button,number):
 
 # When a blank cell is pressed, open nearby blank cells
 def openBlankCells(x,y):
-    if x >= 0 and x < row and y >= 0 and y < col:
-        neighbour = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
-        for n in neighbour:
-            if n[0] >= 0 and n[0] < row and n[1] >= 0 and n[1] < col:
-                if not marked[n[0]][n[1]] and (n not in cellsFlagged):
+    # Check for under-overflow index to prevent KeyError
+    if areValidCoords(x,y):
+        # List that cointains all nearby cells, in a 3x3 sub-matrix
+        neighbor = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+        # For each neighbor
+        for n in neighbor:
+            # Another check for under-overflow index to prevent KeyError        
+            if areValidCoords(n[0],n[1]):
+                # If cell is not already opened and is not flagged and is not a bomb
+                if not marked[n[0]][n[1]] and (n not in cellsFlagged) and board[n[0]][n[1]] != -1 :
+                    # Update cell's image
                     updateImage(cellsList[n],board[n[0]][n[1]])
+                    # Mark cell as opened
                     marked[n[0]][n[1]] = True    
+                    # If was an empty cell
                     if board[n[0]][n[1]] == 0:
+                        # Recursively open nearby blank cells
                         openBlankCells(n[0],n[1])
 
             
@@ -142,15 +169,13 @@ def leftClick(cellPressed,x,y):
         else:
             # If pressed cell is not a bomb, update cell's image
             updateImage(cellPressed,board[x][y])
-
+            # Mark cell as opened
             marked[x][y] = True
     
 # Called when mouse right-click has been pressed over a cell
 # Flag the pressed cell
 def rightClick(cellPressed,x,y):
     # If cell is already flagged, remove the flag
-    print(cellsFlagged)
-    print(marked)
     if (x,y) in cellsFlagged:
         # Remove cell from cellsFlagged list
         cellsFlagged.remove((x,y))
@@ -158,8 +183,7 @@ def rightClick(cellPressed,x,y):
         cellPressed.widget.configure(image=spriteNormal,width=30,height=30)
     # If is not flagged, flag the cell
     else:
-        print(x,y)
-        print(marked[x][y])
+        # If is not already opened
         if not marked[x][y]:
             # Insert flagged cell coord into cellsFlagged list
             cellsFlagged.append((x,y))
@@ -188,11 +212,11 @@ for r in range(row):
 window.mainloop()
 
 # TODO:
-#   * Function that open nearby blank cells when a blank cell is pressed
+#   v Function that open nearby blank cells when a blank cell is pressed
+#   ? Fix border key error
 #   * Explain why updateImage doesnt work without distinguish between widget or just .configure method
 #   Add sprite for number 6,7,8
-#   Fix border key error
-#   Find a formula to calculate better how meny bombs has to spawn
+#   Find a formula to calculate better how many bombs has to spawn
 #   Create some kind of menu with rows and columns input, and difficulty
 #   Add a timer
 #   Add some kind of scoring function
