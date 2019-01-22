@@ -8,12 +8,15 @@ window = Tk()
 # Boolean variable to print statements if in debug mode
 debug = False
 
+# Difficulty (2=Hard,4=Medium,10=Easy)
+difficulty = 4
+
 # Number of rows
 row = 16 # Fixed size, for now
 # Number of columns
 col = 16
 # Number of bombs
-bombs = (row*col) // 4 # Maybe divider (4) can be setted according to the difficoult chosen 
+bombs = (row*col) // int(difficulty)
 print("Row:",row,"Col:",col,"Bombs:",bombs) if debug else None
 
 # Create a board as a board filled with 0
@@ -216,7 +219,6 @@ for r in range(row):
 window.mainloop()
 
 # TODO:
-#Add sprite for number 6,7,8
 #Find a formula to calculate better how many bombs has to spawn
 #Add a timer
 #Add some kind of scoring function
