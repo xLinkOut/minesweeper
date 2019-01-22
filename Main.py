@@ -28,17 +28,21 @@ cellsFlagged = []
 bombsCoord = []
 
 # Images imported as Tk PhotoImage objects
-spriteBomb = PhotoImage(file = "res/bomb.png")
-spriteFlag = PhotoImage(file = "res/flagged.png")
-spriteNormal = PhotoImage(file = "res/normal.png")
+spriteBomb = PhotoImage(file = "res/emoji/bomb.png")
+spriteFlag = PhotoImage(file = "res/emoji/flag.png")
+spriteNormal = PhotoImage(file = "res/emoji/normal.png")
 spriteNumbers =[
-    PhotoImage(file = "res/0.png"),
-    PhotoImage(file = "res/1.png"),
-    PhotoImage(file = "res/2.png"),
-    PhotoImage(file = "res/3.png"),
-    PhotoImage(file = "res/4.png"),
-    PhotoImage(file = "res/5.png"),
-    PhotoImage(file = "res/6.png")
+    PhotoImage(file = "res/emoji/0.png"),
+    PhotoImage(file = "res/emoji/1.png"),
+    PhotoImage(file = "res/emoji/2.png"),
+    PhotoImage(file = "res/emoji/3.png"),
+    PhotoImage(file = "res/emoji/4.png"),
+    PhotoImage(file = "res/emoji/5.png"),
+    PhotoImage(file = "res/emoji/6.png"),
+    PhotoImage(file = "res/emoji/7.png"),
+    PhotoImage(file = "res/emoji/8.png"),
+    PhotoImage(file = "res/emoji/9.png"),
+
 ]
 
 # Insert bombs into the board
@@ -105,7 +109,7 @@ print(linearizedBoard,"\n") if debug else None
 
 # Update button's image when a cell is pressed or flagged
 def updateImage(button,number):
-    # Idk why this is used for, but w/out doesn't work. I'll read docs
+    # Idk why this is used for, but w/out doesn't work.
     if button in cellsList.values():
         # If is a bomb
         if number == -1:
@@ -212,11 +216,8 @@ for r in range(row):
 window.mainloop()
 
 # TODO:
-#   v Function that open nearby blank cells when a blank cell is pressed
-#   ? Fix border key error
-#   * Explain why updateImage doesnt work without distinguish between widget or just .configure method
-#   Add sprite for number 6,7,8
-#   Find a formula to calculate better how many bombs has to spawn
-#   Create some kind of menu with rows and columns input, and difficulty
-#   Add a timer
-#   Add some kind of scoring function
+#Add sprite for number 6,7,8
+#Find a formula to calculate better how many bombs has to spawn
+#Add a timer
+#Add some kind of scoring function
+#Create some kind of menu with rows and columns input, and difficulty
