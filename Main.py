@@ -215,11 +215,11 @@ for r in range(row):
         # :to access this -> cellsList[3,4] -> button in coordinates x=3,y=4
         cellsList[r,c] = button
 
+# Window will be opened from coord (0,0)
+window.geometry("+0+0")
 # Popup the window
 window.mainloop()
 
 # TODO:
 #Find a formula to calculate better how many bombs has to spawn
-#Add a timer
-#Add some kind of scoring function
 #Create some kind of menu with rows and columns input, and difficulty
