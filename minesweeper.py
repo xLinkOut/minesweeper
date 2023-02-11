@@ -8,9 +8,9 @@ from tkinter import messagebox
 from random import randint
 
 class MinesweeperTk(Tk):
-    DEFAULT_ROWS: int = 8
-    DEFAULT_COLUMNS: int = 8
-    DEFAULT_MINES: int = 10
+    DEFAULT_ROWS: int = 4
+    DEFAULT_COLUMNS: int = 4
+    DEFAULT_MINES: int = 4
 
     SPRITES_PATH: str = os.path.join("res", "emoji")
 
@@ -79,6 +79,8 @@ class MinesweeperTk(Tk):
     def get_nearby_cells(self, x: int, y: int) -> list[tuple[int, int]]:
         return [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
 
+
+
     def generate_game_grid(self, genesis_x: int, genesis_y: int):
         genesis_cell_coords = (genesis_x, genesis_y)
         self.logger.debug(f"First move at {genesis_cell_coords}")
@@ -108,6 +110,14 @@ class MinesweeperTk(Tk):
                 row.append('B' if cell.has_mine else str(cell.nearby_mines))
             self.logger.debug(row)
 
+    def check_win(self):
+        # Check if all non-bomb cells are opened or all bomb-cell have a flag on it
+        return (
+            all(cell.is_opened for cell in self.game_grid if not cell.has_mine)
+            or 
+            all(cell.is_flagged for cell in self.game_grid if cell.has_mine)
+        )
+
     def open_cell(self, event):
         # If it's the first move, generate the game grid
         if self.first_move:
@@ -126,7 +136,7 @@ class MinesweeperTk(Tk):
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): has a mine")
             event.widget.configure(image=self.sprite_bomb)
             self.game_over()
-            #messagebox.showinfo("Game over!", "BOOM! 💥")
+            messagebox.showinfo("Game over!", "BOOM! 💥")
             return
 
         # If cell has no nearby mines, open all cells around it
@@ -142,6 +152,11 @@ class MinesweeperTk(Tk):
         # Set cell as opened
         event.widget.is_opened = True
         self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
+
+        # Check if player won
+        if self.check_win():
+            self.game_over()
+            messagebox.showinfo("You won!", "Congratulations! 🎉")
 
     def open_nearby_cells(self, cell: CellButton):
         # If cell is already opened or has flag on it do nothing
@@ -192,6 +207,11 @@ class MinesweeperTk(Tk):
         self.logger.debug(
             f"put_flag ({event.widget.row}, {event.widget.column}): {'flagged' if event.widget.is_flagged else 'unflagged'}"
         )
+
+        # Check if player won
+        if self.check_win():
+            self.game_over()
+            messagebox.showinfo("You won!", "Congratulations! 🎉")
 
 
 if __name__ == "__main__":
