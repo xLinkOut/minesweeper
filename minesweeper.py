@@ -48,9 +48,7 @@ class MinesweeperTk(Tk):
 
         # Set window title
         self.title("Minesweeper")
-        # Center window
-        self.eval("tk::PlaceWindow . center")
-
+        
         # Load sprites
         self.sprite_bomb = PhotoImage(file=os.path.join(self.SPRITES_PATH, "bomb.png"))
         self.sprite_flag = PhotoImage(file=os.path.join(self.SPRITES_PATH, "flag.png"))
@@ -79,6 +77,9 @@ class MinesweeperTk(Tk):
         self.logger.debug(
             f"Grid built with {self.rows} rows and {self.columns} columns"
         )
+
+        # Center window
+        self.eval("tk::PlaceWindow . center")
 
         # On first move, generate the true game grid and place bombs
         self.first_move: bool = True
