@@ -190,6 +190,7 @@ class MinesweeperTk(Tk):
             cell.configure(image=self.sprite_bomb if cell.has_mine else self.sprite_numbers[cell.nearby_mines])
             cell.is_opened = True
             cell["state"] = "disabled"
+        self.update()
 
     def put_flag(self, event):
         # If cell is already opened, do nothing
