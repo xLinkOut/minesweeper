@@ -111,7 +111,7 @@ class MinesweeperTk(Tk):
         # If cell has no nearby mines, open all cells around it
         if event.widget.nearby_mines == 0:
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opening nearby cells")
-            self.open_nearby_empty_cells(event.widget)
+            self.open_nearby_cells(event.widget)
             return
         
         # If cell has no mine, open it and show the number of mines around it
@@ -122,10 +122,10 @@ class MinesweeperTk(Tk):
         event.widget.is_opened = True
         self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
 
-    def open_nearby_empty_cells(self, cell: CellButton):
-        # If cell is already opened, has flag on it or is not empty (has nearby mines) do nothing
-        if cell.is_opened or cell.is_flagged or cell.nearby_mines > 0:
-            # self.logger.debug(f"open_nearby_empty_cells ({cell.row}, {cell.column}): is already opened, has flag on it or is not empty")
+    def open_nearby_cells(self, cell: CellButton):
+        # If cell is already opened or has flag on it do nothing
+        if cell.is_opened or cell.is_flagged: 
+            # self.logger.debug(f"open_nearby_empty_cells ({cell.row}, {cell.column}): is already opened or has flag on it")
             return
         
         # Open cell and show the number of mines around it
@@ -134,15 +134,19 @@ class MinesweeperTk(Tk):
         cell["state"] = "disabled"
         # Set cell as opened
         cell.is_opened = True
-        self.logger.debug(f"open_nearby_empty_cells ({cell.row}, {cell.column}): opened")
-
+        self.logger.debug(f"open_nearby_cells ({cell.row}, {cell.column}): opened")
+        
+        # If cell has nearby mines, don't open cells around it
+        if cell.nearby_mines > 0:
+            return
+        
         # Get coordinates of all cells around the current cell
         x, y = cell.row, cell.column
         nearby_cells: list[tuple[int, int]] = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
         for cell in nearby_cells:
             # If coordinates are valid and cell is not opened, open it
             if self.are_valid_coordinates(cell[0], cell[1]):
-                self.open_nearby_empty_cells(self.game_grid[cell[0] * self.DEFAULT_COLUMNS + cell[1]])
+                self.open_nearby_cells(self.game_grid[cell[0] * self.DEFAULT_COLUMNS + cell[1]])
 
     def game_over(self):
         for cell in self.game_grid:
