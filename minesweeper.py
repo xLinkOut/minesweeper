@@ -107,12 +107,12 @@ class MinesweeperTk(Tk):
             event.widget.configure(image=self.sprite_bomb)
             # TODO: open all cells and show all mines
             # TODO: disable all buttons
-            messagebox.showinfo("Game over!", "BOOM! 💥")
+            #messagebox.showinfo("Game over!", "BOOM! 💥")
             return
 
         # If cell has no mine, open it and show the number of mines around it
-        # TODO: count mines around cell
-        event.widget.configure(image=self.sprite_numbers[0])
+        # TODO: if cell has no nearby mines, open all cells around it
+        event.widget.configure(image=self.sprite_numbers[event.widget.nearby_mines])
         # Disable button
         event.widget["state"] = "disabled"
         # Set cell as opened
