@@ -48,6 +48,13 @@ class MinesweeperTk(Tk):
             PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 10)
         ]
 
+        self.generate_game_grid()
+        self.logger.info("Game started")
+
+    def are_valid_coordinates(self, x: int, y: int) -> bool:
+        return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
+
+    def generate_game_grid(self):
         # Keep track of all cells
         self.game_grid: list[self.CellButton] = []
         # Build game grid
@@ -88,9 +95,6 @@ class MinesweeperTk(Tk):
                 cell = self.game_grid[i * self.DEFAULT_COLUMNS + j]
                 row.append('B' if cell.has_mine else str(cell.nearby_mines))
             self.logger.debug(row)
-
-    def are_valid_coordinates(self, x: int, y: int) -> bool:
-        return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
 
     def open_cell(self, event):
         # If cell is already opened or has flag on it, do nothing
