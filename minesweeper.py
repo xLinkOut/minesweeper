@@ -27,6 +27,14 @@ class MinesweeperTk(Tk):
             PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 10)
         ]
 
+        # Build game grid
+        for i in range(self.DEFAULT_ROWS):
+            for j in range(self.DEFAULT_COLUMNS):
+                # Create a button
+                button = Button(self, image=self.sprite_blank, width=30, height=30)
+                # Place button in grid
+                button.grid(row=i, column=j)
+
 
 if __name__ == "__main__":
     # Create a window with Tkinter
