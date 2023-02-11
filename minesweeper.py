@@ -3,7 +3,7 @@
 
 import os
 from tkinter import *
-
+import logging
 
 class MinesweeperTk(Tk):
     DEFAULT_ROWS: int = 8
@@ -23,6 +23,11 @@ class MinesweeperTk(Tk):
 
     def __init__(self):
         super().__init__()
+
+        # Logger instance
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s %(message)s", datefmt='%Y-%m-%dT%H:%M:%S')
+        self.logger = logging.getLogger("Minesweeper")
+
         # Set window title
         self.title("Minesweeper")
         # Center window
@@ -47,6 +52,7 @@ class MinesweeperTk(Tk):
                 button.bind(sequence="<Button-2>", func=self.put_flag)
                 # Place button in grid
                 button.grid(row=i, column=j)
+        self.logger.debug(f"Grid built with {self.DEFAULT_ROWS} rows and {self.DEFAULT_COLUMNS} columns")
 
     def open_cell(self, event):
         event.widget.configure(image=self.sprite_numbers[0])
