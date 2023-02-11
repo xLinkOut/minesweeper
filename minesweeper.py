@@ -76,19 +76,13 @@ class MinesweeperTk(Tk):
     def are_valid_coordinates(self, x: int, y: int) -> bool:
         return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
 
+    def get_nearby_cells(self, x: int, y: int) -> list[tuple[int, int]]:
+        return [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+
     def generate_game_grid(self, genesis_x: int, genesis_y: int):
         genesis_cell_coords = (genesis_x, genesis_y)
         self.logger.debug(f"First move at {genesis_cell_coords}")
-        genesis_cell_nearby_cells = [
-            (genesis_x-1, genesis_y-1),
-            (genesis_x-1, genesis_y),
-            (genesis_x-1, genesis_y+1),
-            (genesis_x, genesis_y-1),
-            (genesis_x, genesis_y+1),
-            (genesis_x+1, genesis_y-1),
-            (genesis_x+1, genesis_y),
-            (genesis_x+1, genesis_y+1)
-        ]
+        genesis_cell_nearby_cells = self.get_nearby_cells(genesis_x, genesis_y)
 
         # Place bombs
         for i in range(self.DEFAULT_MINES):
@@ -100,7 +94,7 @@ class MinesweeperTk(Tk):
             self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine = True
             self.logger.debug(f"Placed bomb at ({x}, {y})")
             # Update nearby mines count for all cells around the bomb
-            nearby_cells: list[tuple[int, int]] = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+            nearby_cells = self.get_nearby_cells(x, y)
             for cell in nearby_cells:
                 if self.are_valid_coordinates(cell[0], cell[1]):
                     self.game_grid[cell[0] * self.DEFAULT_COLUMNS + cell[1]].nearby_mines += 1
@@ -169,7 +163,7 @@ class MinesweeperTk(Tk):
         
         # Get coordinates of all cells around the current cell
         x, y = cell.row, cell.column
-        nearby_cells: list[tuple[int, int]] = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+        nearby_cells = self.get_nearby_cells(x, y)
         for cell in nearby_cells:
             # If coordinates are valid and cell is not opened, open it
             if self.are_valid_coordinates(cell[0], cell[1]):
