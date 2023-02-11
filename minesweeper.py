@@ -105,8 +105,7 @@ class MinesweeperTk(Tk):
         if event.widget.has_mine:
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): has a mine")
             event.widget.configure(image=self.sprite_bomb)
-            # TODO: open all cells and show all mines
-            # TODO: disable all buttons
+            self.game_over()
             #messagebox.showinfo("Game over!", "BOOM! 💥")
             return
 
@@ -118,6 +117,12 @@ class MinesweeperTk(Tk):
         # Set cell as opened
         event.widget.is_opened = True
         self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
+
+    def game_over(self):
+        for cell in self.game_grid:
+            cell.configure(image=self.sprite_bomb if cell.has_mine else self.sprite_numbers[cell.nearby_mines])
+            cell.is_opened = True
+            cell["state"] = "disabled"
 
     def put_flag(self, event):
         # If cell is already opened, do nothing
