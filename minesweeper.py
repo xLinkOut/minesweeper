@@ -89,8 +89,10 @@ class MinesweeperTk(Tk):
         # Place bombs
         for i in range(self.DEFAULT_MINES):
             x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
-            # If bomb is placed on the first move cell or in it's nearby (3x3) cells, try again
-            while((x, y) == genesis_cell_coords or (x, y) in genesis_cell_nearby_cells):
+            # If bomb is placed on the first move cell or in it's nearby (3x3) cells, or
+            # bomb is placed on another bomb, try again
+            while((x, y) == genesis_cell_coords or (x, y) in genesis_cell_nearby_cells or \
+                self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine):
                 x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
             # Place bomb
             self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine = True
