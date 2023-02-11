@@ -145,15 +145,14 @@ class MinesweeperTk(Tk):
         if event.widget.nearby_mines == 0:
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opening nearby cells")
             self.open_nearby_cells(event.widget)
-            return
-        
-        # If cell has no mine, open it and show the number of mines around it
-        event.widget.configure(image=self.sprite_numbers[event.widget.nearby_mines])
-        # Disable button
-        event.widget["state"] = "disabled"
-        # Set cell as opened
-        event.widget.is_opened = True
-        self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
+        else:
+            # If cell has no mine, open it and show the number of mines around it
+            event.widget.configure(image=self.sprite_numbers[event.widget.nearby_mines])
+            # Disable button
+            event.widget["state"] = "disabled"
+            # Set cell as opened
+            event.widget.is_opened = True
+            self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
 
         # Check if player won
         if self.check_win():
