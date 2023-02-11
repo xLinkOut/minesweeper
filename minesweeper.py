@@ -5,7 +5,7 @@ import logging
 import os
 from tkinter import *
 from tkinter import messagebox
-
+from random import randint
 
 class MinesweeperTk(Tk):
     DEFAULT_ROWS: int = 8
@@ -22,6 +22,7 @@ class MinesweeperTk(Tk):
             self.has_mine = False
             self.is_opened = False
             self.is_flagged = False
+            self.nearby_mines = 0
 
     def __init__(self):
         super().__init__()
@@ -47,6 +48,8 @@ class MinesweeperTk(Tk):
             PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 10)
         ]
 
+        # Keep track of all cells
+        self.game_grid = []
         # Build game grid
         for i in range(self.DEFAULT_ROWS):
             for j in range(self.DEFAULT_COLUMNS):
@@ -60,9 +63,18 @@ class MinesweeperTk(Tk):
                 button.bind(sequence="<Button-2>", func=self.put_flag)
                 # Place button in grid (row i and column j)
                 button.grid(row=i, column=j)
+                # Add button to game grid
+                self.game_grid.append(button)
         self.logger.debug(
             f"Grid built with {self.DEFAULT_ROWS} rows and {self.DEFAULT_COLUMNS} columns"
         )
+
+        # Place bombs
+        for i in range(self.DEFAULT_MINES):
+            x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
+            self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine = True
+            self.logger.debug(f"Placed bomb at ({x}, {y})")
+        self.logger.debug(f"Placed {self.DEFAULT_MINES} bombs")
 
     def open_cell(self, event):
         # If cell is already opened or has flag on it, do nothing
