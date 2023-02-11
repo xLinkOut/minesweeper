@@ -37,7 +37,7 @@ class MinesweeperTk(Tk):
 
         # Logger instance
         logging.basicConfig(
-            level=logging.DEBUG,
+            level=logging.DEBUG if debug else logging.INFO,
             format="%(asctime)s %(name)s %(levelname)s %(message)s",
             datefmt="%Y-%m-%dT%H:%M:%S",
         )
@@ -230,6 +230,7 @@ if __name__ == "__main__":
         "-d",
         "--debug",
         action="store_true",
+        default=False,
         help="Enable debug mode",
     )
     
