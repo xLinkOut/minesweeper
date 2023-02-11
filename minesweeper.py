@@ -76,6 +76,14 @@ class MinesweeperTk(Tk):
             self.logger.debug(f"Placed bomb at ({x}, {y})")
         self.logger.debug(f"Placed {self.DEFAULT_MINES} bombs")
 
+        # Print game grid
+        for i in range(self.DEFAULT_ROWS):
+            row = []
+            for j in range(self.DEFAULT_COLUMNS):
+                cell = self.game_grid[i * self.DEFAULT_COLUMNS + j]
+                row.append('B' if cell.has_mine else str(cell.nearby_mines))
+            self.logger.debug(row)
+
     def open_cell(self, event):
         # If cell is already opened or has flag on it, do nothing
         if event.widget.is_opened or event.widget.is_flagged:
