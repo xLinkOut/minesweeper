@@ -74,6 +74,12 @@ class MinesweeperTk(Tk):
             x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
             self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine = True
             self.logger.debug(f"Placed bomb at ({x}, {y})")
+            # Update nearby mines count for all cells around the bomb
+            nearby_cells = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+            for cell in nearby_cells:
+                if self.are_valid_coordinates(cell[0], cell[1]):
+                    self.game_grid[cell[0] * self.DEFAULT_COLUMNS + cell[1]].nearby_mines += 1
+
         self.logger.debug(f"Placed {self.DEFAULT_MINES} bombs")
 
         # Print game grid
@@ -83,6 +89,9 @@ class MinesweeperTk(Tk):
                 cell = self.game_grid[i * self.DEFAULT_COLUMNS + j]
                 row.append('B' if cell.has_mine else str(cell.nearby_mines))
             self.logger.debug(row)
+
+    def are_valid_coordinates(self, x, y):
+        return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
 
     def open_cell(self, event):
         # If cell is already opened or has flag on it, do nothing
