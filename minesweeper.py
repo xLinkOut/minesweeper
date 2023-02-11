@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 from tkinter import *
-import logging
+from tkinter import messagebox
+
 
 class MinesweeperTk(Tk):
     DEFAULT_ROWS: int = 8
@@ -25,7 +27,11 @@ class MinesweeperTk(Tk):
         super().__init__()
 
         # Logger instance
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s %(message)s", datefmt='%Y-%m-%dT%H:%M:%S')
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s %(name)s %(levelname)s %(message)s",
+            datefmt="%Y-%m-%dT%H:%M:%S",
+        )
         self.logger = logging.getLogger("Minesweeper")
 
         # Set window title
@@ -44,22 +50,63 @@ class MinesweeperTk(Tk):
         # Build game grid
         for i in range(self.DEFAULT_ROWS):
             for j in range(self.DEFAULT_COLUMNS):
-                # Create a button
-                button = self.CellButton(self, row=i, column=j, image=self.sprite_blank, width=30, height=30)
-                # Bind an handler for mouse left-click on a cell, that 'open' the cell
+                # Create a Cell button with a blank sprite
+                button = self.CellButton(
+                    self, row=i, column=j, image=self.sprite_blank, width=30, height=30
+                )
+                # Bind an handler for mouse left-click on a cell that open it
                 button.bind(sequence="<Button-1>", func=self.open_cell)
-                # Bind an handler for mouse right-click on a cell that put a flag on the cell
+                # Bind an handler for mouse right-click on a cell that put a flag on it
                 button.bind(sequence="<Button-2>", func=self.put_flag)
-                # Place button in grid
+                # Place button in grid (row i and column j)
                 button.grid(row=i, column=j)
-        self.logger.debug(f"Grid built with {self.DEFAULT_ROWS} rows and {self.DEFAULT_COLUMNS} columns")
+        self.logger.debug(
+            f"Grid built with {self.DEFAULT_ROWS} rows and {self.DEFAULT_COLUMNS} columns"
+        )
 
     def open_cell(self, event):
+        # If cell is already opened or has flag on it, do nothing
+        if event.widget.is_opened or event.widget.is_flagged:
+            self.logger.debug(
+                f"open_cell ({event.widget.row}, {event.widget.column}): is already opened or has flag on it"
+            )
+            return
+
+        # If cell has a mine, open it and show the bomb sprite
+        if event.widget.has_mine:
+            self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): has a mine")
+            event.widget.configure(image=self.sprite_bomb)
+            # TODO: open all cells and show all mines
+            # TODO: disable all buttons
+            messagebox.showinfo("Game over!", "BOOM! 💥")
+            return
+
+        # If cell has no mine, open it and show the number of mines around it
+        # TODO: count mines around cell
         event.widget.configure(image=self.sprite_numbers[0])
+        # Disable button
         event.widget["state"] = "disabled"
+        # Set cell as opened
+        event.widget.is_opened = True
+        self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
 
     def put_flag(self, event):
-        event.widget.configure(image=self.sprite_flag)
+        # If cell is already opened, do nothing
+        if event.widget.is_opened:
+            self.logger.debug(
+                f"put_flag ({event.widget.row}, {event.widget.column}): is already opened"
+            )
+            return
+
+        # Toggle flag on cell
+        event.widget.is_flagged = not event.widget.is_flagged
+        event.widget.configure(
+            image=self.sprite_flag if event.widget.is_flagged else self.sprite_blank
+        )
+        event.widget["state"] = "disabled" if event.widget.is_flagged else "normal"
+        self.logger.debug(
+            f"put_flag ({event.widget.row}, {event.widget.column}): {'flagged' if event.widget.is_flagged else 'unflagged'}"
+        )
 
 
 if __name__ == "__main__":
