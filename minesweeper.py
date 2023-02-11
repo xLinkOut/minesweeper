@@ -11,10 +11,6 @@ from typing import Optional
 
 
 class MinesweeperTk(Tk):
-    DEFAULT_ROWS: int = 4
-    DEFAULT_COLUMNS: int = 4
-    DEFAULT_MINES: int = 4
-
     SPRITES_PATH: str = os.path.join("res", "emoji")
     CONFIG: dict[str, dict[str, int]] = {
         "easy": {"rows": 9, "columns": 9, "mines": 10},
@@ -43,6 +39,13 @@ class MinesweeperTk(Tk):
         )
         self.logger = logging.getLogger("Minesweeper")
 
+        # Parse arguments
+        self.logger.debug(f"Arguments: {level}, {rows}, {columns}, {mines}, {debug}")
+        self.rows: int = rows or self.CONFIG[level]["rows"]
+        self.columns: int = columns or self.CONFIG[level]["columns"]
+        self.mines: int = mines or self.CONFIG[level]["mines"]
+        self.logger.info(f"Game grid: {self.rows}x{self.columns} with {self.mines} mines")
+
         # Set window title
         self.title("Minesweeper")
         # Center window
@@ -59,8 +62,8 @@ class MinesweeperTk(Tk):
         # Keep track of all cells
         self.game_grid: list[self.CellButton] = []
         # Build blank game grid
-        for i in range(self.DEFAULT_ROWS):
-            for j in range(self.DEFAULT_COLUMNS):
+        for i in range(self.rows):
+            for j in range(self.columns):
                 # Create a Cell button with a blank sprite
                 button = self.CellButton(
                     self, row=i, column=j, image=self.sprite_blank, width=30, height=30
@@ -74,7 +77,7 @@ class MinesweeperTk(Tk):
                 # Add button to game grid
                 self.game_grid.append(button)
         self.logger.debug(
-            f"Grid built with {self.DEFAULT_ROWS} rows and {self.DEFAULT_COLUMNS} columns"
+            f"Grid built with {self.rows} rows and {self.columns} columns"
         )
 
         # On first move, generate the true game grid and place bombs
@@ -82,7 +85,7 @@ class MinesweeperTk(Tk):
         self.logger.info("Game started")
 
     def are_valid_coordinates(self, x: int, y: int) -> bool:
-        return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
+        return 0 <= x < self.rows and 0 <= y < self.columns
 
     def get_nearby_cells(self, x: int, y: int) -> list[tuple[int, int]]:
         return [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
@@ -95,28 +98,28 @@ class MinesweeperTk(Tk):
         genesis_cell_nearby_cells = self.get_nearby_cells(genesis_x, genesis_y)
 
         # Place bombs
-        for i in range(self.DEFAULT_MINES):
-            x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
+        for i in range(self.mines):
+            x, y = randint(0, self.rows - 1), randint(0, self.columns - 1)
             # If bomb is placed on the first move cell or in it's nearby (3x3) cells, or
             # bomb is placed on another bomb, try again
             while((x, y) == genesis_cell_coords or (x, y) in genesis_cell_nearby_cells or \
-                self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine):
-                x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
+                self.game_grid[x * self.columns + y].has_mine):
+                x, y = randint(0, self.rows - 1), randint(0, self.columns - 1)
             # Place bomb
-            self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine = True
+            self.game_grid[x * self.columns + y].has_mine = True
             self.logger.debug(f"Placed bomb at ({x}, {y})")
             # Update nearby mines count for all cells around the bomb
             nearby_cells = self.get_nearby_cells(x, y)
             for cell in nearby_cells:
                 if self.are_valid_coordinates(cell[0], cell[1]):
-                    self.game_grid[cell[0] * self.DEFAULT_COLUMNS + cell[1]].nearby_mines += 1
-        self.logger.debug(f"Placed {self.DEFAULT_MINES} bombs")
+                    self.game_grid[cell[0] * self.columns + cell[1]].nearby_mines += 1
+        self.logger.debug(f"Placed {self.mines} bombs")
 
         # Print game grid
-        for i in range(self.DEFAULT_ROWS):
+        for i in range(self.rows):
             row: list[str] = []
-            for j in range(self.DEFAULT_COLUMNS):
-                cell = self.game_grid[i * self.DEFAULT_COLUMNS + j]
+            for j in range(self.columns):
+                cell = self.game_grid[i * self.columns + j]
                 row.append('B' if cell.has_mine else str(cell.nearby_mines))
             self.logger.debug(row)
 
@@ -191,7 +194,7 @@ class MinesweeperTk(Tk):
         for cell in nearby_cells:
             # If coordinates are valid and cell is not opened, open it
             if self.are_valid_coordinates(cell[0], cell[1]):
-                self.open_nearby_cells(self.game_grid[cell[0] * self.DEFAULT_COLUMNS + cell[1]])
+                self.open_nearby_cells(self.game_grid[cell[0] * self.columns + cell[1]])
 
     def game_over(self):
         for cell in self.game_grid:
@@ -238,7 +241,6 @@ if __name__ == "__main__":
         "-l",
         "--level",
         type=str,
-        default="medium",
         help="Game level (easy, medium, hard)",
     )
 
@@ -265,11 +267,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Check on arguments
-    if args.level not in ["easy", "medium", "hard"]:
-        parser.error("Invalid level")
-    
     if args.level and (args.rows or args.columns or args.mines):
         parser.error("Cannot use level and custom mode at the same time")
+    
+    if args.level and args.level not in ["easy", "medium", "hard"]:
+        parser.error("Invalid level")
     
     if not args.level and (args.rows <= 0 or args.columns <= 0 or args.mines <= 0):
         parser.error("Invalid number of rows, columns or mines")
