@@ -48,16 +48,9 @@ class MinesweeperTk(Tk):
             PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 10)
         ]
 
-        self.generate_game_grid()
-        self.logger.info("Game started")
-
-    def are_valid_coordinates(self, x: int, y: int) -> bool:
-        return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
-
-    def generate_game_grid(self):
         # Keep track of all cells
         self.game_grid: list[self.CellButton] = []
-        # Build game grid
+        # Build blank game grid
         for i in range(self.DEFAULT_ROWS):
             for j in range(self.DEFAULT_COLUMNS):
                 # Create a Cell button with a blank sprite
@@ -76,9 +69,34 @@ class MinesweeperTk(Tk):
             f"Grid built with {self.DEFAULT_ROWS} rows and {self.DEFAULT_COLUMNS} columns"
         )
 
+        # On first move, generate the true game grid and place bombs
+        self.first_move: bool = True
+        self.logger.info("Game started")
+
+    def are_valid_coordinates(self, x: int, y: int) -> bool:
+        return 0 <= x < self.DEFAULT_ROWS and 0 <= y < self.DEFAULT_COLUMNS
+
+    def generate_game_grid(self, genesis_x: int, genesis_y: int):
+        genesis_cell_coords = (genesis_x, genesis_y)
+        self.logger.debug(f"First move at {genesis_cell_coords}")
+        genesis_cell_nearby_cells = [
+            (genesis_x-1, genesis_y-1),
+            (genesis_x-1, genesis_y),
+            (genesis_x-1, genesis_y+1),
+            (genesis_x, genesis_y-1),
+            (genesis_x, genesis_y+1),
+            (genesis_x+1, genesis_y-1),
+            (genesis_x+1, genesis_y),
+            (genesis_x+1, genesis_y+1)
+        ]
+
         # Place bombs
         for i in range(self.DEFAULT_MINES):
             x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
+            # If bomb is placed on the first move cell or in it's nearby (3x3) cells, try again
+            while((x, y) == genesis_cell_coords or (x, y) in genesis_cell_nearby_cells):
+                x, y = randint(0, self.DEFAULT_ROWS - 1), randint(0, self.DEFAULT_COLUMNS - 1)
+            # Place bomb
             self.game_grid[x * self.DEFAULT_COLUMNS + y].has_mine = True
             self.logger.debug(f"Placed bomb at ({x}, {y})")
             # Update nearby mines count for all cells around the bomb
@@ -97,6 +115,11 @@ class MinesweeperTk(Tk):
             self.logger.debug(row)
 
     def open_cell(self, event):
+        # If it's the first move, generate the game grid
+        if self.first_move:
+            self.generate_game_grid(genesis_x=event.widget.row, genesis_y=event.widget.column)
+            self.first_move = False
+
         # If cell is already opened or has flag on it, do nothing
         if event.widget.is_opened or event.widget.is_flagged:
             self.logger.debug(
