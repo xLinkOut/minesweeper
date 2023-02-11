@@ -3,9 +3,12 @@
 
 import logging
 import os
+from argparse import ArgumentParser
+from random import randint
 from tkinter import *
 from tkinter import messagebox
-from random import randint
+from typing import Optional
+
 
 class MinesweeperTk(Tk):
     DEFAULT_ROWS: int = 4
@@ -13,7 +16,12 @@ class MinesweeperTk(Tk):
     DEFAULT_MINES: int = 4
 
     SPRITES_PATH: str = os.path.join("res", "emoji")
-
+    CONFIG: dict[str, dict[str, int]] = {
+        "easy": {"rows": 9, "columns": 9, "mines": 10},
+        "medium": {"rows": 16, "columns": 16, "mines": 40},
+        "hard": {"rows": 16, "columns": 30, "mines": 99},
+    }
+    
     class CellButton(Button):
         def __init__(self, master, row: int, column: int, **kwargs):
             super().__init__(master, **kwargs)
@@ -24,7 +32,7 @@ class MinesweeperTk(Tk):
             self.is_flagged: bool = False
             self.nearby_mines: int = 0
 
-    def __init__(self):
+    def __init__(self, level: Optional[str], rows: Optional[int], columns: Optional[int], mines: Optional[int], debug: bool = False):
         super().__init__()
 
         # Logger instance
@@ -217,7 +225,55 @@ class MinesweeperTk(Tk):
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser(description="Minesweeper game")
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug mode",
+    )
+    
+    parser.add_argument(
+        "-l",
+        "--level",
+        type=str,
+        default="medium",
+        help="Game level (easy, medium, hard)",
+    )
+
+    custom_grid = parser.add_argument_group("Custom grid")
+    custom_grid.add_argument(
+        "-r",
+        "--rows",
+        type=int,
+        help="Number of rows in the game grid",
+    )
+    custom_grid.add_argument(
+        "-c",
+        "--columns",
+        type=int,
+        help="Number of columns in the game grid",
+    )
+    custom_grid.add_argument(
+        "-m",
+        "--mines",
+        type=int,
+        help="Number of mines in the game grid",
+    )
+    
+    args = parser.parse_args()
+
+    # Check on arguments
+    if args.level not in ["easy", "medium", "hard"]:
+        parser.error("Invalid level")
+    
+    if args.level and (args.rows or args.columns or args.mines):
+        parser.error("Cannot use level and custom mode at the same time")
+    
+    if not args.level and (args.rows <= 0 or args.columns <= 0 or args.mines <= 0):
+        parser.error("Invalid number of rows, columns or mines")
+
     # Create a window with Tkinter
-    window = MinesweeperTk()
+    window = MinesweeperTk(level=args.level, rows=args.rows, columns=args.columns, mines=args.mines, debug=args.debug)
     # Show window
     window.mainloop()
