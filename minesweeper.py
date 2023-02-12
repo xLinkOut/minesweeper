@@ -221,6 +221,13 @@ class MinesweeperTk(Tk):
         self.update()
 
     def put_flag(self, event):
+        # If it's the first move, do nothing
+        if self.first_move:
+            self.logger.debug(
+                f"put_flag ({event.widget.row}, {event.widget.column}): first move, use left click to open cell"
+            )
+            return
+
         # If cell is already opened, do nothing
         if event.widget.is_opened:
             self.logger.debug(
