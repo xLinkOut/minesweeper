@@ -243,7 +243,7 @@ class MinesweeperTk(Tk):
             cell["state"] = "disabled"
         self.update()
     
-    def open_cell(self, event: Event[CellButton]):
+    def open_cell(self, event: Event):
         """Open a cell. If it's the first move, generate the game grid.
         If cell is already opened or has flag on it, do nothing.
         If cell has a mine, open it and show the bomb sprite: game is lost.
@@ -294,7 +294,7 @@ class MinesweeperTk(Tk):
             self.game_over()
             messagebox.showinfo("You won!", "Congratulations! 🎉")
 
-    def put_flag(self, event: Event[CellButton]):
+    def put_flag(self, event: Event):
         """Put a flag on a cell. If it's the first move, do nothing.
         If cell is already opened, do nothing.
         If cell has a flag on it, remove it.
