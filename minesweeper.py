@@ -11,7 +11,11 @@ from typing import Optional
 
 
 class MinesweeperTk(Tk):
+    """Minesweeper game class. Extends tkinter.Tk."""
+
+    # Path to sprites
     SPRITES_PATH: str = os.path.join("res", "emoji")
+    # Game difficulty levels, same as in the original game
     CONFIG: dict[str, dict[str, int]] = {
         "easy": {"rows": 9, "columns": 9, "mines": 10},
         "medium": {"rows": 16, "columns": 16, "mines": 40},
@@ -19,6 +23,14 @@ class MinesweeperTk(Tk):
     }
 
     class CellButton(Button):
+        """Cell button class. Extends tkinter.Button.
+        It keeps track of its own coordinates, if it has a mine, if it is opened, if it is flagged
+        and how many mines are nearby.
+
+        Args:
+            Button (Button): tkinter.Button class
+        """
+
         def __init__(self, master, row: int, column: int, **kwargs):
             super().__init__(master, **kwargs)
             self.row: int = row
@@ -36,6 +48,16 @@ class MinesweeperTk(Tk):
         mines: Optional[int],
         debug: bool = False,
     ):
+        """Minesweeper game class constructor.
+
+        Args:
+            level (Optional[str]): Game difficulty level. Can be "easy", "medium" or "hard".
+            rows (Optional[int]): Number of rows in the game grid, mutually exclusive with level.
+            columns (Optional[int]): Number of columns in the game grid, mutually exclusive with level.
+            mines (Optional[int]): Number of mines in the game grid, mutually exclusive with level.
+            debug (bool, optional): Enable debug mode. Defaults to False.
+        """
+
         super().__init__()
 
         # Logger instance
@@ -66,7 +88,7 @@ class MinesweeperTk(Tk):
 
         # Keep track of all cells
         self.game_grid: list[self.CellButton] = []
-        # Build blank game grid
+        # Build blank, graphical game grid
         for i in range(self.rows):
             for j in range(self.columns):
                 # Create a Cell button with a blank sprite
@@ -91,9 +113,29 @@ class MinesweeperTk(Tk):
         self.logger.info("Game started")
 
     def are_valid_coordinates(self, coords: tuple[int, int]) -> bool:
+        """Check if a tuple of coordinates is valid for the game grid.
+
+        Args:
+            coords (tuple[int, int]): tuple of coordinates (x, y)
+
+        Returns:
+            bool: True if coordinates are valid, False otherwise
+        """
+
         return 0 <= coords[0] < self.rows and 0 <= coords[1] < self.columns
 
     def get_nearby_cells(self, x: int, y: int) -> list[tuple[int, int]]:
+        """Get a list of coordinates of the 8 cells around a given cell.
+        List is already filtered to remove invalid coordinates.
+
+        Args:
+            x (int): cell x coordinate.
+            y (int): cell y coordinate.
+
+        Returns:
+            list[tuple[int, int]]: list of coordinates of the 8 cells around a given cell.
+        """
+
         return list(
             filter(
                 self.are_valid_coordinates,
@@ -111,6 +153,13 @@ class MinesweeperTk(Tk):
         )
 
     def generate_game_grid(self, genesis_x: int, genesis_y: int):
+        """Generate the true game grid and place bombs.
+
+        Args:
+            genesis_x (int): first move x coordinate.
+            genesis_y (int): first move y coordinate.
+        """
+
         genesis_cell_coords = (genesis_x, genesis_y)
         self.logger.debug(f"First move at {genesis_cell_coords}")
         genesis_cell_nearby_cells = self.get_nearby_cells(genesis_x, genesis_y)
@@ -141,14 +190,70 @@ class MinesweeperTk(Tk):
                 cell = self.game_grid[i * self.columns + j]
                 row.append("B" if cell.has_mine else str(cell.nearby_mines))
             self.logger.debug(row)
+    
+    def open_nearby_cells(self, cell: CellButton):
+        """Recursively open all cells around a given blank cell.
 
-    def check_win(self):
+        Args:
+            cell (CellButton): first cell to open.
+        """
+
+        # If cell is already opened or has flag on it do nothing
+        if cell.is_opened or cell.is_flagged:
+            # self.logger.debug(f"open_nearby_empty_cells ({cell.row}, {cell.column}): is already opened or has flag on it")
+            return
+
+        # Open cell and show the number of mines around it
+        cell.configure(image=self.sprite_numbers[cell.nearby_mines])
+        # Disable button
+        cell["state"] = "disabled"
+        # Set cell as opened
+        cell.is_opened = True
+        self.logger.debug(f"open_nearby_cells ({cell.row}, {cell.column}): opened")
+
+        # If cell has nearby mines, don't open cells around it
+        if cell.nearby_mines > 0:
+            return
+
+        # Get coordinates of all cells around the current cell
+        for cell in self.get_nearby_cells(cell.row, cell.column):
+            self.open_nearby_cells(self.game_grid[cell[0] * self.columns + cell[1]])
+
+    def check_win(self) -> bool:
+        """Check if the game is won.
+        A game is won if all non-bomb cells are opened or all bomb-cell have a flag on it.
+
+        Returns:
+            bool: True if the game is won, False otherwise
+        """
+
         # Check if all non-bomb cells are opened or all bomb-cell have a flag on it
         return all(cell.is_opened for cell in self.game_grid if not cell.has_mine) or all(
             cell.is_flagged for cell in self.game_grid if cell.has_mine
         )
 
-    def open_cell(self, event):
+    def game_over(self):
+        """Show all bombs and disable all cells."""
+
+        for cell in self.game_grid:
+            cell.configure(
+                image=self.sprite_bomb if cell.has_mine else self.sprite_numbers[cell.nearby_mines]
+            )
+            cell.is_opened = True
+            cell["state"] = "disabled"
+        self.update()
+    
+    def open_cell(self, event: Event[CellButton]):
+        """Open a cell. If it's the first move, generate the game grid.
+        If cell is already opened or has flag on it, do nothing.
+        If cell has a mine, open it and show the bomb sprite: game is lost.
+        If cell is blank, open all cells around it.
+        Also check if game is won after each move.
+
+        Args:
+            event (Event[CellButton]): cell button (left) click event.
+        """
+
         # If it's the first move, generate the game grid
         if self.first_move:
             self.generate_game_grid(genesis_x=event.widget.row, genesis_y=event.widget.column)
@@ -189,38 +294,17 @@ class MinesweeperTk(Tk):
             self.game_over()
             messagebox.showinfo("You won!", "Congratulations! 🎉")
 
-    def open_nearby_cells(self, cell: CellButton):
-        # If cell is already opened or has flag on it do nothing
-        if cell.is_opened or cell.is_flagged:
-            # self.logger.debug(f"open_nearby_empty_cells ({cell.row}, {cell.column}): is already opened or has flag on it")
-            return
+    def put_flag(self, event: Event[CellButton]):
+        """Put a flag on a cell. If it's the first move, do nothing.
+        If cell is already opened, do nothing.
+        If cell has a flag on it, remove it.
+        If cell has no flag on it, put it.
+        Also check if game is won after each move.
 
-        # Open cell and show the number of mines around it
-        cell.configure(image=self.sprite_numbers[cell.nearby_mines])
-        # Disable button
-        cell["state"] = "disabled"
-        # Set cell as opened
-        cell.is_opened = True
-        self.logger.debug(f"open_nearby_cells ({cell.row}, {cell.column}): opened")
+        Args:
+            event (Event[CellButton]): cell button (right) click event.
+        """
 
-        # If cell has nearby mines, don't open cells around it
-        if cell.nearby_mines > 0:
-            return
-
-        # Get coordinates of all cells around the current cell
-        for cell in self.get_nearby_cells(cell.row, cell.column):
-            self.open_nearby_cells(self.game_grid[cell[0] * self.columns + cell[1]])
-
-    def game_over(self):
-        for cell in self.game_grid:
-            cell.configure(
-                image=self.sprite_bomb if cell.has_mine else self.sprite_numbers[cell.nearby_mines]
-            )
-            cell.is_opened = True
-            cell["state"] = "disabled"
-        self.update()
-
-    def put_flag(self, event):
         # If it's the first move, do nothing
         if self.first_move:
             self.logger.debug(
