@@ -83,7 +83,7 @@ class MinesweeperTk(Tk):
         self.sprite_flag = PhotoImage(file=os.path.join(self.SPRITES_PATH, "flag.png"))
         self.sprite_blank = PhotoImage(file=os.path.join(self.SPRITES_PATH, "blank.png"))
         self.sprite_numbers = [
-            PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 10)
+            PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 9)
         ]
 
         # Keep track of all cells
