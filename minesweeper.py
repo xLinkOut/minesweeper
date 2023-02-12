@@ -268,6 +268,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Check on arguments
+    if not args.level and not args.rows and not args.columns and not args.mines:
+        parser.error("No arguments provided")
+
     if args.level and (args.rows or args.columns or args.mines):
         parser.error("Cannot use level and custom mode at the same time")
     
@@ -276,6 +279,9 @@ if __name__ == "__main__":
     
     if not args.level and (args.rows <= 0 or args.columns <= 0 or args.mines <= 0):
         parser.error("Invalid number of rows, columns or mines")
+    
+    if not args.level and (args.mines >= args.rows * args.columns):
+        parser.error("Number of mines must be less than number of cells")
 
     # Create a window with Tkinter
     window = MinesweeperTk(level=args.level, rows=args.rows, columns=args.columns, mines=args.mines, debug=args.debug)
