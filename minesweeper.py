@@ -81,7 +81,7 @@ class MinesweeperTk(Tk):
         # Load sprites
         self.sprite_bomb = PhotoImage(file=os.path.join(self.SPRITES_PATH, "bomb.png"))
         self.sprite_flag = PhotoImage(file=os.path.join(self.SPRITES_PATH, "flag.png"))
-        self.sprite_blank = PhotoImage(file=os.path.join(self.SPRITES_PATH, "normal.png"))
+        self.sprite_blank = PhotoImage(file=os.path.join(self.SPRITES_PATH, "blank.png"))
         self.sprite_numbers = [
             PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 10)
         ]
