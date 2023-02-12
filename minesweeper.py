@@ -14,7 +14,7 @@ class MinesweeperTk(Tk):
     """Minesweeper game class. Extends tkinter.Tk."""
 
     # Path to sprites
-    SPRITES_PATH: str = os.path.join("res", "emoji")
+    SPRITES_PATH: str = os.path.join("sprites", "emoji")
     # Game difficulty levels, same as in the original game
     CONFIG: dict[str, dict[str, int]] = {
         "easy": {"rows": 9, "columns": 9, "mines": 10},
