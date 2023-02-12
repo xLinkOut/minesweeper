@@ -15,6 +15,8 @@ class MinesweeperTk(Tk):
 
     # Path to sprites
     SPRITES_PATH: str = os.path.join("sprites", "emoji")
+    # Path to icons
+    ICON_PATH: str = os.path.join("sprites", "icons")
     # Game difficulty levels, same as in the original game
     CONFIG: dict[str, dict[str, int]] = {
         "easy": {"rows": 9, "columns": 9, "mines": 10},
@@ -77,6 +79,8 @@ class MinesweeperTk(Tk):
 
         # Set window title
         self.title("Minesweeper")
+        # Set window icon
+        self.iconphoto(True, PhotoImage(file=os.path.join(self.ICON_PATH, "minesweeper.png")))
 
         # Load sprites
         self.sprite_bomb = PhotoImage(file=os.path.join(self.SPRITES_PATH, "bomb.png"))

@@ -43,3 +43,7 @@ Lastly, `--debug` enable the debug mode, surprisingly: it will log a lot more in
 - [x] Code a working implementation of Minesweeper game with Python and Tkinter;
 - [ ] Code an auto-solving mechanism using pure game logic and math;
 - [ ] Build some kind of machine learning algorithm that learn and solve the game.
+
+## Credits
++ Minesweeper app icon: unknown @ [pngegg.com](https://www.pngegg.com/en/png-eoqvk)
++ macOS app icon: u/fordou @ [macosicons.com](https://macosicons.com/#/u/fordou)
