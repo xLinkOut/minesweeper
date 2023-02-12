@@ -99,6 +99,8 @@ class MinesweeperTk(Tk):
                 button.bind(sequence="<Button-1>", func=self.open_cell)
                 # Bind an handler for mouse right-click on a cell that put a flag on it
                 button.bind(sequence="<Button-2>", func=self.put_flag)
+                # Bind an handler for mouse middle-click on a cell that print the game grid in the console
+                button.bind(sequence="<Button-3>", func=self.print_game_grid)
                 # Place button in grid (row i and column j)
                 button.grid(row=i, column=j)
                 # Add button to game grid
@@ -183,14 +185,29 @@ class MinesweeperTk(Tk):
                 self.game_grid[cell[0] * self.columns + cell[1]].nearby_mines += 1
         self.logger.debug(f"Placed {self.mines} bombs")
 
-        # Print game grid
+        self.print_game_grid()
+
+    def print_game_grid(self, event: Optional[Event] = None):
+        """Print the game grid in the console, if debug is enabled.
+        Can be called from middle mouse click on any cell.
+        If called before first move, do nothing.
+
+        Args:
+            event (Optional[Event], optional): event that triggered the function. Defaults to None.
+        """
+
+        if self.first_move:
+            return
+
         for i in range(self.rows):
             row: list[str] = []
             for j in range(self.columns):
                 cell = self.game_grid[i * self.columns + j]
-                row.append("B" if cell.has_mine else str(cell.nearby_mines))
+                row.append(
+                    "B" if cell.has_mine else "?" if cell.is_flagged else str(cell.nearby_mines)
+                )
             self.logger.debug(row)
-    
+
     def open_nearby_cells(self, cell: CellButton):
         """Recursively open all cells around a given blank cell.
 
@@ -242,7 +259,7 @@ class MinesweeperTk(Tk):
             cell.is_opened = True
             cell["state"] = "disabled"
         self.update()
-    
+
     def open_cell(self, event: Event):
         """Open a cell. If it's the first move, generate the game grid.
         If cell is already opened or has flag on it, do nothing.
@@ -256,8 +273,8 @@ class MinesweeperTk(Tk):
 
         # If it's the first move, generate the game grid
         if self.first_move:
-            self.generate_game_grid(genesis_x=event.widget.row, genesis_y=event.widget.column)
             self.first_move = False
+            self.generate_game_grid(genesis_x=event.widget.row, genesis_y=event.widget.column)
 
         # If cell is already opened or has flag on it, do nothing
         if event.widget.is_opened or event.widget.is_flagged:
