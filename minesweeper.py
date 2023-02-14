@@ -105,6 +105,9 @@ class MinesweeperTk(Tk):
                 button.bind(sequence="<Button-2>", func=self.put_flag)
                 # Bind an handler for mouse middle-click on a cell that print the game grid in the console
                 button.bind(sequence="<Button-3>", func=self.print_game_grid)
+                # Bind an handler for mouse double-left-click on a cell to open nearby cells if the
+                # number of flags around it is the same as the number of nearby mines (chording)
+                button.bind(sequence="<Double-Button-1>", func=self.chording)
                 # Place button in grid (row i and column j)
                 button.grid(row=i, column=j)
                 # Add button to game grid
@@ -354,6 +357,59 @@ class MinesweeperTk(Tk):
         if self.check_win():
             self.game_over()
             messagebox.showinfo("You won!", "Congratulations! 🎉")
+
+    def chording(self, event: Event):
+        """Chording is a technique used to open cells around a cell with a number on it.
+        If the number of flags around a cell is equal to the number of mines around it,
+        open all cells around it.
+
+
+        Args:
+            event (Event[CellButton]): cell button (left) double click event.
+        """
+
+        if event.widget.is_flagged:
+            self.logger.debug(
+                f"chording ({event.widget.row}, {event.widget.column}): has flag on it"
+            )
+            return
+
+        if event.widget.nearby_mines == 0:
+            self.logger.debug(
+                f"chording ({event.widget.row}, {event.widget.column}): has no nearby mines"
+            )
+            return
+
+        nearby_flags: int = 0
+        nearby_cells = self.get_nearby_cells(event.widget.row, event.widget.column)
+        for cell in nearby_cells:
+            if self.game_grid[cell[0] * self.columns + cell[1]].is_flagged:
+                nearby_flags += 1
+
+        self.logger.debug(
+            f"chording ({event.widget.row}, {event.widget.column}): found {nearby_flags} nearby flags"
+        )
+        self.logger.debug(
+            f"chording ({event.widget.row}, {event.widget.column}): there are {event.widget.nearby_mines} nearby mines"
+        )
+
+        if event.widget.nearby_mines == nearby_flags:
+            for cell in nearby_cells:
+                cell = self.game_grid[cell[0] * self.columns + cell[1]]
+
+                if cell.is_flagged:
+                    continue
+
+                if cell.nearby_mines == 0:
+                    self.open_nearby_cells(cell)
+                else:
+                    # Open cell and show the number of mines around it
+                    cell.configure(image=self.sprite_numbers[cell.nearby_mines])
+                    # Disable button
+                    cell["state"] = "disabled"
+                    # Set cell as opened
+                    cell.is_opened = True
+                    self.logger.debug(f"chording ({cell.row}, {cell.column}): opened")
 
 
 if __name__ == "__main__":
