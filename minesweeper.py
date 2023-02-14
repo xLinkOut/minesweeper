@@ -133,7 +133,7 @@ class MinesweeperTk(Tk):
 
         return 0 <= coords[0] < self.rows and 0 <= coords[1] < self.columns
 
-    def get_nearby_cells(self, x: int, y: int) -> list[tuple[int, int]]:
+    def get_nearby_cells_coords(self, x: int, y: int) -> list[tuple[int, int]]:
         """Get a list of coordinates of the 8 cells around a given cell.
         List is already filtered to remove invalid coordinates.
 
@@ -161,6 +161,21 @@ class MinesweeperTk(Tk):
             )
         )
 
+    def get_nearby_cells(self, cell: CellButton) -> list[CellButton]:
+        """Get a list of the 8 cells around a given cell.
+
+        Args:
+            cell (CellButton): cell.
+
+        Returns:
+            list[CellButton]: list of the 8 cells around a given cell.
+        """
+
+        return [
+            self.game_grid[x * self.columns + y]
+            for x, y in self.get_nearby_cells_coords(cell.row, cell.column)
+        ]
+
     def generate_game_grid(self, genesis_x: int, genesis_y: int):
         """Generate the true game grid and place bombs.
 
@@ -171,7 +186,7 @@ class MinesweeperTk(Tk):
 
         genesis_cell_coords = (genesis_x, genesis_y)
         self.logger.debug(f"First move at {genesis_cell_coords}")
-        genesis_cell_nearby_cells = self.get_nearby_cells(genesis_x, genesis_y)
+        genesis_cell_nearby_cells = self.get_nearby_cells_coords(genesis_x, genesis_y)
 
         # Place bombs
         for i in range(self.mines):
@@ -188,7 +203,7 @@ class MinesweeperTk(Tk):
             self.game_grid[x * self.columns + y].has_mine = True
             self.logger.debug(f"Placed bomb at ({x}, {y})")
             # Update nearby mines count for all cells around the bomb
-            for cell in self.get_nearby_cells(x, y):
+            for cell in self.get_nearby_cells_coords(x, y):
                 self.game_grid[cell[0] * self.columns + cell[1]].nearby_mines += 1
         self.logger.debug(f"Placed {self.mines} bombs")
 
@@ -240,8 +255,8 @@ class MinesweeperTk(Tk):
             return
 
         # Get coordinates of all cells around the current cell
-        for cell in self.get_nearby_cells(cell.row, cell.column):
-            self.open_nearby_cells(self.game_grid[cell[0] * self.columns + cell[1]])
+        for nearby_cell in self.get_nearby_cells(cell):
+            self.open_nearby_cells(nearby_cell)
 
     def check_win(self) -> bool:
         """Check if the game is won.
@@ -381,9 +396,9 @@ class MinesweeperTk(Tk):
             return
 
         nearby_flags: int = 0
-        nearby_cells = self.get_nearby_cells(event.widget.row, event.widget.column)
+        nearby_cells = self.get_nearby_cells(event.widget)
         for cell in nearby_cells:
-            if self.game_grid[cell[0] * self.columns + cell[1]].is_flagged:
+            if cell.is_flagged:
                 nearby_flags += 1
 
         self.logger.debug(
@@ -395,7 +410,6 @@ class MinesweeperTk(Tk):
 
         if event.widget.nearby_mines == nearby_flags:
             for cell in nearby_cells:
-                cell = self.game_grid[cell[0] * self.columns + cell[1]]
 
                 if cell.is_flagged:
                     continue
