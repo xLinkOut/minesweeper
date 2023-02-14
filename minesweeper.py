@@ -121,6 +121,24 @@ class MinesweeperTk(Tk):
         self.first_move: bool = True
         self.logger.info("Game started")
 
+    def _open_single_cell(self, cell: CellButton):
+        """Open a single cell, without doing any check. Kind of internal function used by
+        open_cell, chording and probably others. It does not check if the game is over,
+        just open the cell and change the state of a single cell (button).
+
+        Args:
+            cell (CellButton): cell to open
+        """
+
+        # Open cell and show the number of mines around it
+        cell.configure(
+            image=self.sprite_bomb if cell.has_mine else self.sprite_numbers[cell.nearby_mines]
+        )
+        # Disable button
+        cell["state"] = "disabled"
+        # Set cell as opened
+        cell.is_opened = True
+
     def are_valid_coordinates(self, coords: tuple[int, int]) -> bool:
         """Check if a tuple of coordinates is valid for the game grid.
 
@@ -242,12 +260,7 @@ class MinesweeperTk(Tk):
             # self.logger.debug(f"open_nearby_empty_cells ({cell.row}, {cell.column}): is already opened or has flag on it")
             return
 
-        # Open cell and show the number of mines around it
-        cell.configure(image=self.sprite_numbers[cell.nearby_mines])
-        # Disable button
-        cell["state"] = "disabled"
-        # Set cell as opened
-        cell.is_opened = True
+        self._open_single_cell(cell)
         self.logger.debug(f"open_nearby_cells ({cell.row}, {cell.column}): opened")
 
         # If cell has nearby mines, don't open cells around it
@@ -275,11 +288,8 @@ class MinesweeperTk(Tk):
         """Show all bombs and disable all cells."""
 
         for cell in self.game_grid:
-            cell.configure(
-                image=self.sprite_bomb if cell.has_mine else self.sprite_numbers[cell.nearby_mines]
-            )
-            cell.is_opened = True
-            cell["state"] = "disabled"
+            self._open_single_cell(cell)
+        # Update window after all cells are opened
         self.update()
 
     def open_cell(self, event: Event):
@@ -320,12 +330,7 @@ class MinesweeperTk(Tk):
             )
             self.open_nearby_cells(event.widget)
         else:
-            # If cell has no mine, open it and show the number of mines around it
-            event.widget.configure(image=self.sprite_numbers[event.widget.nearby_mines])
-            # Disable button
-            event.widget["state"] = "disabled"
-            # Set cell as opened
-            event.widget.is_opened = True
+            self._open_single_cell(event.widget)
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
 
         # Check if player won
@@ -417,12 +422,7 @@ class MinesweeperTk(Tk):
                 if cell.nearby_mines == 0:
                     self.open_nearby_cells(cell)
                 else:
-                    # Open cell and show the number of mines around it
-                    cell.configure(image=self.sprite_numbers[cell.nearby_mines])
-                    # Disable button
-                    cell["state"] = "disabled"
-                    # Set cell as opened
-                    cell.is_opened = True
+                    self._open_single_cell(cell)
                     self.logger.debug(f"chording ({cell.row}, {cell.column}): opened")
 
 
