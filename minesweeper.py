@@ -3,14 +3,14 @@
 
 import logging
 import os
+import tkinter as tk
+import tkinter.messagebox as msgbox
 from argparse import ArgumentParser
 from random import randint
-from tkinter import *
-from tkinter import messagebox
 from typing import Optional
 
 
-class MinesweeperTk(Tk):
+class MinesweeperTk(tk.Tk):
     """Minesweeper game class. Extends tkinter.Tk."""
 
     # Path to sprites
@@ -24,7 +24,7 @@ class MinesweeperTk(Tk):
         "hard": {"rows": 16, "columns": 30, "mines": 99},
     }
 
-    class CellButton(Button):
+    class CellButton(tk.Button):
         """Cell button class. Extends tkinter.Button.
         It keeps track of its own coordinates, if it has a mine, if it is opened, if it is flagged
         and how many mines are nearby.
@@ -80,14 +80,14 @@ class MinesweeperTk(Tk):
         # Set window title
         self.title("Minesweeper")
         # Set window icon
-        self.iconphoto(True, PhotoImage(file=os.path.join(self.ICON_PATH, "minesweeper.png")))
+        self.iconphoto(True, tk.PhotoImage(file=os.path.join(self.ICON_PATH, "minesweeper.png")))
 
         # Load sprites
-        self.sprite_bomb = PhotoImage(file=os.path.join(self.SPRITES_PATH, "bomb.png"))
-        self.sprite_flag = PhotoImage(file=os.path.join(self.SPRITES_PATH, "flag.png"))
-        self.sprite_blank = PhotoImage(file=os.path.join(self.SPRITES_PATH, "blank.png"))
+        self.sprite_bomb = tk.PhotoImage(file=os.path.join(self.SPRITES_PATH, "bomb.png"))
+        self.sprite_flag = tk.PhotoImage(file=os.path.join(self.SPRITES_PATH, "flag.png"))
+        self.sprite_blank = tk.PhotoImage(file=os.path.join(self.SPRITES_PATH, "blank.png"))
         self.sprite_numbers = [
-            PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 9)
+            tk.PhotoImage(file=os.path.join(self.SPRITES_PATH, f"{i}.png")) for i in range(0, 9)
         ]
 
         # Keep track of all cells
@@ -227,7 +227,7 @@ class MinesweeperTk(Tk):
 
         self.print_game_grid()
 
-    def print_game_grid(self, event: Optional[Event] = None):
+    def print_game_grid(self, event: Optional[tk.Event] = None):
         """Print the game grid in the console, if debug is enabled.
         Can be called from middle mouse click on any cell.
         If called before first move, do nothing.
@@ -292,7 +292,7 @@ class MinesweeperTk(Tk):
         # Update window after all cells are opened
         self.update()
 
-    def open_cell(self, event: Event):
+    def open_cell(self, event: tk.Event):
         """Open a cell. If it's the first move, generate the game grid.
         If cell is already opened or has flag on it, do nothing.
         If cell has a mine, open it and show the bomb sprite: game is lost.
@@ -320,7 +320,7 @@ class MinesweeperTk(Tk):
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): has a mine")
             event.widget.configure(image=self.sprite_bomb)
             self.game_over()
-            messagebox.showinfo("Game over!", "BOOM! 💥")
+            tk.messagebox.showinfo("Game over!", "BOOM! 💥")
             return
 
         # If cell has no nearby mines, open all cells around it
@@ -336,9 +336,9 @@ class MinesweeperTk(Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            messagebox.showinfo("You won!", "Congratulations! 🎉")
+            tk.messagebox.showinfo("You won!", "Congratulations! 🎉")
 
-    def put_flag(self, event: Event):
+    def put_flag(self, event: tk.Event):
         """Put a flag on a cell. If it's the first move, do nothing.
         If cell is already opened, do nothing.
         If cell has a flag on it, remove it.
@@ -376,9 +376,9 @@ class MinesweeperTk(Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            messagebox.showinfo("You won!", "Congratulations! 🎉")
+            tk.messagebox.showinfo("You won!", "Congratulations! 🎉")
 
-    def chording(self, event: Event):
+    def chording(self, event: tk.Event):
         """Chording is a technique used to open cells around a cell with a number on it.
         If the number of flags around a cell is equal to the number of mines around it,
         open all cells around it.
