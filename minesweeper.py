@@ -320,7 +320,7 @@ class MinesweeperTk(tk.Tk):
             self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): has a mine")
             event.widget.configure(image=self.sprite_bomb)
             self.game_over()
-            tk.messagebox.showinfo("Game over!", "BOOM! 💥")
+            msgbox.showinfo("Game over!", "BOOM! 💥")
             return
 
         # If cell has no nearby mines, open all cells around it
@@ -336,7 +336,7 @@ class MinesweeperTk(tk.Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            tk.messagebox.showinfo("You won!", "Congratulations! 🎉")
+            msgbox.showinfo("You won!", "Congratulations! 🎉")
 
     def put_flag(self, event: tk.Event):
         """Put a flag on a cell. If it's the first move, do nothing.
@@ -376,7 +376,7 @@ class MinesweeperTk(tk.Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            tk.messagebox.showinfo("You won!", "Congratulations! 🎉")
+            msgbox.showinfo("You won!", "Congratulations! 🎉")
 
     def chording(self, event: tk.Event):
         """Chording is a technique used to open cells around a cell with a number on it.
@@ -418,12 +418,22 @@ class MinesweeperTk(tk.Tk):
 
                 if cell.is_flagged:
                     continue
-
+                
+                if cell.has_mine:
+                    self.game_over()
+                    msgbox.showinfo("Game over!", "BOOM! 💥")
+                    return
+                
                 if cell.nearby_mines == 0:
                     self.open_nearby_cells(cell)
                 else:
                     self._open_single_cell(cell)
                     self.logger.debug(f"chording ({cell.row}, {cell.column}): opened")
+        
+        # Check if player won
+        if self.check_win():
+            self.game_over()
+            msgbox.showinfo("You won!", "Congratulations! 🎉")
 
 
 if __name__ == "__main__":
