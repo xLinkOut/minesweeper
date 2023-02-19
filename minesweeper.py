@@ -44,10 +44,10 @@ class MinesweeperTk(tk.Tk):
 
     def __init__(
         self,
-        level: Optional[str],
-        rows: Optional[int],
-        columns: Optional[int],
-        mines: Optional[int],
+        level: Optional[str] = None,
+        rows: Optional[int] = None,
+        columns: Optional[int] = None,
+        mines: Optional[int] = None,
         debug: bool = False,
     ):
         """Minesweeper game class constructor.
