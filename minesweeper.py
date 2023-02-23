@@ -19,9 +19,9 @@ class MinesweeperTk(tk.Tk):
     ICON_PATH: str = os.path.join("sprites", "icons")
     # Game difficulty, same as in the original game
     CONFIG: dict[str, dict[str, int]] = {
-        "easy": {"rows": 9, "columns": 9, "mines": 10},
-        "medium": {"rows": 16, "columns": 16, "mines": 40},
-        "hard": {"rows": 16, "columns": 30, "mines": 99},
+        "beginner": {"rows": 9, "columns": 9, "mines": 10},
+        "intermediate": {"rows": 16, "columns": 16, "mines": 40},
+        "expert": {"rows": 16, "columns": 30, "mines": 99},
     }
 
     class CellButton(tk.Button):
@@ -53,7 +53,7 @@ class MinesweeperTk(tk.Tk):
         """Minesweeper game class constructor.
 
         Args:
-            difficulty (Optional[str]): Game difficulty. Can be "easy", "medium" or "hard".
+            difficulty (Optional[str]): Game difficulty. Can be "beginner", "intermediate" or "expert".
             rows (Optional[int]): Number of rows in the game grid, mutually exclusive with difficulty.
             columns (Optional[int]): Number of columns in the game grid, mutually exclusive with difficulty.
             mines (Optional[int]): Number of mines in the game grid, mutually exclusive with difficulty.
@@ -446,8 +446,8 @@ if __name__ == "__main__":
         "-d",
         "--difficulty",
         type=str,
-        choices=["easy", "medium", "hard"],
-        help="Game difficulty (easy, medium, hard)",
+        choices=["beginner", "intermediate", "expert"],
+        help="Game difficulty",
     )
 
     custom_grid = parser.add_argument_group("Custom grid")
@@ -485,9 +485,6 @@ if __name__ == "__main__":
 
     if args.difficulty and (args.rows or args.columns or args.mines):
         parser.error("Cannot use difficulty and custom mode at the same time")
-
-    if args.difficulty and args.difficulty not in ["easy", "medium", "hard"]:
-        parser.error("Invalid difficulty")
 
     if not args.difficulty and (args.rows <= 0 or args.columns <= 0 or args.mines <= 0):
         parser.error("Invalid number of rows, columns or mines")
