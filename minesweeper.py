@@ -17,7 +17,7 @@ class MinesweeperTk(tk.Tk):
     SPRITES_PATH: str = os.path.join("sprites", "emoji")
     # Path to icons
     ICON_PATH: str = os.path.join("sprites", "icons")
-    # Game difficulty levels, same as in the original game
+    # Game difficulty, same as in the original game
     CONFIG: dict[str, dict[str, int]] = {
         "easy": {"rows": 9, "columns": 9, "mines": 10},
         "medium": {"rows": 16, "columns": 16, "mines": 40},
@@ -44,7 +44,7 @@ class MinesweeperTk(tk.Tk):
 
     def __init__(
         self,
-        level: Optional[str] = None,
+        difficulty: Optional[str] = None,
         rows: Optional[int] = None,
         columns: Optional[int] = None,
         mines: Optional[int] = None,
@@ -53,10 +53,10 @@ class MinesweeperTk(tk.Tk):
         """Minesweeper game class constructor.
 
         Args:
-            level (Optional[str]): Game difficulty level. Can be "easy", "medium" or "hard".
-            rows (Optional[int]): Number of rows in the game grid, mutually exclusive with level.
-            columns (Optional[int]): Number of columns in the game grid, mutually exclusive with level.
-            mines (Optional[int]): Number of mines in the game grid, mutually exclusive with level.
+            difficulty (Optional[str]): Game difficulty. Can be "easy", "medium" or "hard".
+            rows (Optional[int]): Number of rows in the game grid, mutually exclusive with difficulty.
+            columns (Optional[int]): Number of columns in the game grid, mutually exclusive with difficulty.
+            mines (Optional[int]): Number of mines in the game grid, mutually exclusive with difficulty.
             debug (bool, optional): Enable debug mode. Defaults to False.
         """
 
@@ -71,10 +71,10 @@ class MinesweeperTk(tk.Tk):
         self.logger = logging.getLogger("Minesweeper")
 
         # Parse arguments
-        self.logger.debug(f"Arguments: {level}, {rows}, {columns}, {mines}, {debug}")
-        self.rows: int = rows or self.CONFIG[level]["rows"]
-        self.columns: int = columns or self.CONFIG[level]["columns"]
-        self.mines: int = mines or self.CONFIG[level]["mines"]
+        self.logger.debug(f"Arguments: {difficulty}, {rows}, {columns}, {mines}, {debug}")
+        self.rows: int = rows or self.CONFIG[difficulty]["rows"]
+        self.columns: int = columns or self.CONFIG[difficulty]["columns"]
+        self.mines: int = mines or self.CONFIG[difficulty]["mines"]
         self.logger.info(f"Game grid: {self.rows}x{self.columns} with {self.mines} mines")
 
         # Set window title
@@ -440,19 +440,14 @@ class MinesweeperTk(tk.Tk):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Minesweeper game")
-    parser.add_argument(
+    
+    grid_size = parser.add_argument_group("Grid size")
+    grid_size.add_argument(
         "-d",
-        "--debug",
-        action="store_true",
-        default=False,
-        help="Enable debug mode",
-    )
-
-    parser.add_argument(
-        "-l",
-        "--level",
+        "--difficulty",
         type=str,
-        help="Game level (easy, medium, hard)",
+        choices=["easy", "medium", "hard"],
+        help="Game difficulty (easy, medium, hard)",
     )
 
     custom_grid = parser.add_argument_group("Custom grid")
@@ -475,27 +470,34 @@ if __name__ == "__main__":
         help="Number of mines in the game grid",
     )
 
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+        help="Enable debug mode",
+    )
+
     args = parser.parse_args()
 
     # Check on arguments
-    if not args.level and not args.rows and not args.columns and not args.mines:
+    if not args.difficulty and not args.rows and not args.columns and not args.mines:
         parser.error("No arguments provided")
 
-    if args.level and (args.rows or args.columns or args.mines):
-        parser.error("Cannot use level and custom mode at the same time")
+    if args.difficulty and (args.rows or args.columns or args.mines):
+        parser.error("Cannot use difficulty and custom mode at the same time")
 
-    if args.level and args.level not in ["easy", "medium", "hard"]:
-        parser.error("Invalid level")
+    if args.difficulty and args.difficulty not in ["easy", "medium", "hard"]:
+        parser.error("Invalid difficulty")
 
-    if not args.level and (args.rows <= 0 or args.columns <= 0 or args.mines <= 0):
+    if not args.difficulty and (args.rows <= 0 or args.columns <= 0 or args.mines <= 0):
         parser.error("Invalid number of rows, columns or mines")
 
-    if not args.level and (args.mines >= args.rows * args.columns):
+    if not args.difficulty and (args.mines >= args.rows * args.columns):
         parser.error("Number of mines must be less than number of cells")
 
     # Create a window with Tkinter
     window = MinesweeperTk(
-        level=args.level, rows=args.rows, columns=args.columns, mines=args.mines, debug=args.debug
+        difficulty=args.difficulty, rows=args.rows, columns=args.columns, mines=args.mines, debug=args.debug
     )
     # Show window
     window.mainloop()
