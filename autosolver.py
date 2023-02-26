@@ -253,6 +253,13 @@ if __name__ == "__main__":
         help="Enable debug mode",
     )
 
+    parser.add_argument(
+        "-n",
+        type=int,
+        default=1,
+        help="Number of games to play",
+    )
+
     args = parser.parse_args()
 
     # Check on arguments
@@ -268,15 +275,21 @@ if __name__ == "__main__":
     if not args.difficulty and (args.mines >= args.rows * args.columns):
         parser.error("Number of mines must be less than number of cells")
 
-    # Create a window with Tkinter
-    game = MinesweeperTk(
-        difficulty=args.difficulty,
-        rows=args.rows,
-        columns=args.columns,
-        mines=args.mines,
-        debug=args.debug,
-        non_interactive=True,
-    )
+    if args.n <= 0:
+        parser.error("Invalid number of games")
 
-    autosolver = AutoSolver(game=game, debug=args.debug)
-    autosolver.solve()
+    for i in range(args.n):
+        # Create a window with Tkinter
+        game = MinesweeperTk(
+            difficulty=args.difficulty,
+            rows=args.rows,
+            columns=args.columns,
+            mines=args.mines,
+            debug=args.debug,
+            non_interactive=True,
+        )
+
+        autosolver = AutoSolver(game=game, debug=args.debug)
+        autosolver.solve()
+
+        game.destroy()
