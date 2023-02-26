@@ -327,35 +327,38 @@ class MinesweeperTk(tk.Tk):
             event (Event[CellButton]): cell button (left) click event.
         """
 
+        # Get cell from event, just for convenience
+        cell: self.CellButton = event.widget
+
         # If it's the first move, generate the game grid
         if self.first_move:
             self.first_move = False
-            self.generate_game_grid(genesis_x=event.widget.row, genesis_y=event.widget.column)
+            self.generate_game_grid(genesis_x=cell.row, genesis_y=cell.column)
 
         # If cell is already opened or has flag on it, do nothing
-        if event.widget.is_opened or event.widget.is_flagged:
+        if cell.is_opened or cell.is_flagged:
             self.logger.debug(
-                f"open_cell ({event.widget.row}, {event.widget.column}): is already opened or has flag on it"
+                f"open_cell ({cell.row}, {cell.column}): is already opened or has flag on it"
             )
             return
 
         # If cell has a mine, open it and show the bomb sprite
-        if event.widget.has_mine:
-            self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): has a mine")
-            event.widget.configure(image=self.sprite_bomb)
+        if cell.has_mine:
+            self.logger.debug(f"open_cell ({cell.row}, {cell.column}): has a mine")
+            cell.configure(image=self.sprite_bomb)
             self.game_over()
             msgbox.showinfo("Game over!", "BOOM! 💥")
             return
 
         # If cell has no nearby mines, open all cells around it
-        if event.widget.nearby_mines == 0:
+        if cell.nearby_mines == 0:
             self.logger.debug(
-                f"open_cell ({event.widget.row}, {event.widget.column}): opening nearby cells"
+                f"open_cell ({cell.row}, {cell.column}): opening nearby cells"
             )
-            self.open_nearby_cells(event.widget)
+            self.open_nearby_cells(cell)
         else:
-            self._open_single_cell(event.widget)
-            self.logger.debug(f"open_cell ({event.widget.row}, {event.widget.column}): opened")
+            self._open_single_cell(cell)
+            self.logger.debug(f"open_cell ({cell.row}, {cell.column}): opened")
 
         # Check if player won
         if self.check_win():
@@ -372,29 +375,32 @@ class MinesweeperTk(tk.Tk):
         Args:
             event (Event[CellButton]): cell button (right) click event.
         """
+        
+        # Get cell from event, just for convenience
+        cell: self.CellButton = event.widget
 
         # If it's the first move, do nothing
         if self.first_move:
             self.logger.debug(
-                f"put_flag ({event.widget.row}, {event.widget.column}): first move, use left click to open cell"
+                f"put_flag ({cell.row}, {cell.column}): first move, use left click to open cell"
             )
             return
 
         # If cell is already opened, do nothing
-        if event.widget.is_opened:
+        if cell.is_opened:
             self.logger.debug(
-                f"put_flag ({event.widget.row}, {event.widget.column}): is already opened"
+                f"put_flag ({cell.row}, {cell.column}): is already opened"
             )
             return
 
         # Toggle flag on cell
-        event.widget.is_flagged = not event.widget.is_flagged
-        event.widget.configure(
-            image=self.sprite_flag if event.widget.is_flagged else self.sprite_blank
+        cell.is_flagged = not cell.is_flagged
+        cell.configure(
+            image=self.sprite_flag if cell.is_flagged else self.sprite_blank
         )
-        event.widget["state"] = "disabled" if event.widget.is_flagged else "normal"
+        cell["state"] = "disabled" if cell.is_flagged else "normal"
         self.logger.debug(
-            f"put_flag ({event.widget.row}, {event.widget.column}): {'flagged' if event.widget.is_flagged else 'unflagged'}"
+            f"put_flag ({cell.row}, {cell.column}): {'flagged' if cell.is_flagged else 'unflagged'}"
         )
 
         # Check if player won
@@ -412,46 +418,49 @@ class MinesweeperTk(tk.Tk):
             event (Event[CellButton]): cell button (left) double click event.
         """
 
-        if event.widget.is_flagged:
+        # Get cell from event, just for convenience
+        cell: self.CellButton = event.widget
+
+        if cell.is_flagged:
             self.logger.debug(
-                f"chording ({event.widget.row}, {event.widget.column}): has flag on it"
+                f"chording ({cell.row}, {cell.column}): has flag on it"
             )
             return
 
-        if event.widget.nearby_mines == 0:
+        if cell.nearby_mines == 0:
             self.logger.debug(
-                f"chording ({event.widget.row}, {event.widget.column}): has no nearby mines"
+                f"chording ({cell.row}, {cell.column}): has no nearby mines"
             )
             return
 
         nearby_flags: int = 0
-        for cell in event.widget.neighbors:
-            if cell.is_flagged:
+        for nearby_cell in cell.neighbors:
+            if nearby_cell.is_flagged:
                 nearby_flags += 1
 
         self.logger.debug(
-            f"chording ({event.widget.row}, {event.widget.column}): found {nearby_flags} nearby flags"
+            f"chording ({cell.row}, {cell.column}): found {nearby_flags} nearby flags"
         )
         self.logger.debug(
-            f"chording ({event.widget.row}, {event.widget.column}): there are {event.widget.nearby_mines} nearby mines"
+            f"chording ({cell.row}, {cell.column}): there are {cell.nearby_mines} nearby mines"
         )
 
-        if event.widget.nearby_mines == nearby_flags:
-            for cell in event.widget.neighbors:
+        if cell.nearby_mines == nearby_flags:
+            for nearby_cell in cell.neighbors:
 
-                if cell.is_flagged:
+                if nearby_cell.is_flagged:
                     continue
                 
-                if cell.has_mine:
+                if nearby_cell.has_mine:
                     self.game_over()
                     msgbox.showinfo("Game over!", "BOOM! 💥")
                     return
                 
-                if cell.nearby_mines == 0:
-                    self.open_nearby_cells(cell)
+                if nearby_cell.nearby_mines == 0:
+                    self.open_nearby_cells(nearby_cell)
                 else:
-                    self._open_single_cell(cell)
-                    self.logger.debug(f"chording ({cell.row}, {cell.column}): opened")
+                    self._open_single_cell(nearby_cell)
+                    self.logger.debug(f"chording ({nearby_cell.row}, {nearby_cell.column}): opened")
         
         # Check if player won
         if self.check_win():
