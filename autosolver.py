@@ -115,7 +115,6 @@ class AutoSolver:
     def _sets_strategy(self):
         """Use mathematical sets-based strategy to overcome difficult situation."""
 
-        self.game.update()
         self.logger.info("Using sets strategy")
         did_something = False
 
@@ -182,9 +181,8 @@ class AutoSolver:
                     did_something = True
                     self.game.open_cell(self.FakeEvent(cell))
                     self.logger.debug(f"Opened cell: {cell}")
-        
+
         if did_something:
-            self.game.update()
             self.logger.info("Sets strategy did something!")
         return did_something
 
@@ -199,9 +197,12 @@ class AutoSolver:
         # While the game is not finished
         while not self.game.finished:
             self._flag_cells()
-            self.game.update()
+            if self.game.debug:
+                self.game.update()
+            
             self._open_cells()
-            self.game.update()
+            if self.game.debug:
+                self.game.update()
 
             # Check if the game is stuck
             if opened_or_flagged_cells == self._count_opened_or_flagged_cells():
@@ -213,6 +214,8 @@ class AutoSolver:
             # Update number of opened or flagged cells
             opened_or_flagged_cells = self._count_opened_or_flagged_cells()
 
+            if self.game.debug:
+                self.game.update()
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Minesweeper game")
