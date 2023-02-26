@@ -292,7 +292,7 @@ class MinesweeperTk(tk.Tk):
             return
 
         # Get coordinates of all cells around the current cell
-        for nearby_cell in self.get_nearby_cells(cell):
+        for nearby_cell in cell.neighbors:
             self.open_nearby_cells(nearby_cell)
 
     def check_win(self) -> bool:
@@ -425,8 +425,7 @@ class MinesweeperTk(tk.Tk):
             return
 
         nearby_flags: int = 0
-        nearby_cells = self.get_nearby_cells(event.widget)
-        for cell in nearby_cells:
+        for cell in event.widget.neighbors:
             if cell.is_flagged:
                 nearby_flags += 1
 
@@ -438,7 +437,7 @@ class MinesweeperTk(tk.Tk):
         )
 
         if event.widget.nearby_mines == nearby_flags:
-            for cell in nearby_cells:
+            for cell in event.widget.neighbors:
 
                 if cell.is_flagged:
                     continue
