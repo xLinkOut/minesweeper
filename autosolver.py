@@ -11,8 +11,10 @@ from minesweeper import MinesweeperTk
 class AutoSolver:
     def __init__(self, game: MinesweeperTk, debug: bool = False):
         self.game: MinesweeperTk = game
+        self.debug: bool = debug
+
         logging.basicConfig(
-            level=logging.DEBUG if debug else logging.INFO,
+            level=logging.DEBUG if self.debug else logging.INFO,
             format="%(asctime)s %(name)s %(levelname)s %(message)s",
             datefmt="%Y-%m-%dT%H:%M:%S",
         )
@@ -197,11 +199,11 @@ class AutoSolver:
         # While the game is not finished
         while not self.game.finished:
             self._flag_cells()
-            if self.game.debug:
+            if self.debug:
                 self.game.update()
             
             self._open_cells()
-            if self.game.debug:
+            if self.debug:
                 self.game.update()
 
             # Check if the game is stuck
@@ -214,8 +216,16 @@ class AutoSolver:
             # Update number of opened or flagged cells
             opened_or_flagged_cells = self._count_opened_or_flagged_cells()
 
-            if self.game.debug:
+            if self.debug:
                 self.game.update()
+
+        if self.game.won:
+            self.logger.info("Game won!")
+        else:
+            self.logger.info("Game lost!")
+        
+        return self.game.won
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Minesweeper game")
@@ -281,6 +291,7 @@ if __name__ == "__main__":
     if args.n <= 0:
         parser.error("Invalid number of games")
 
+    won_counter: int = 0
     for i in range(args.n):
         # Create a window with Tkinter
         game = MinesweeperTk(
@@ -293,6 +304,9 @@ if __name__ == "__main__":
         )
 
         autosolver = AutoSolver(game=game, debug=args.debug)
-        autosolver.solve()
+        if autosolver.solve():
+            won_counter += 1
 
         game.destroy()
+
+    print(f"Games won: {won_counter}/{args.n} ({won_counter/args.n*100:.2f}%)")
