@@ -41,6 +41,15 @@ class MinesweeperTk(tk.Tk):
             self.is_opened: bool = False
             self.is_flagged: bool = False
             self.nearby_mines: int = 0
+        
+        def __str__(self) -> str:
+            return (
+                f"Cell ({self.row}, {self.column}): "
+                f"{self.nearby_mines} mines nearby, "
+                f"has mine: {self.has_mine}, "
+                f"is opened: {self.is_opened}, "
+                f"is flagged: {self.is_flagged}"
+            )
 
     def __init__(
         self,
