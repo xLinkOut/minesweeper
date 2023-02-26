@@ -50,6 +50,12 @@ class MinesweeperTk(tk.Tk):
                 f"is opened: {self.is_opened}, "
                 f"is flagged: {self.is_flagged}"
             )
+        
+        def __repr__(self) -> str:
+            return (
+                f"Cell ({self.row}, {self.column}, {self.nearby_mines}, "
+                f"{self.has_mine}, {self.is_opened}, {self.is_flagged})"
+            )
 
     def __init__(
         self,
