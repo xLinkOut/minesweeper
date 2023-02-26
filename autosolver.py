@@ -1,9 +1,43 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
 from argparse import ArgumentParser
+from random import randint
 
 from minesweeper import MinesweeperTk
+
+
+class AutoSolver:
+    def __init__(self, game: MinesweeperTk, debug: bool = False):
+        self.game: MinesweeperTk = game
+        logging.basicConfig(
+            level=logging.DEBUG if debug else logging.INFO,
+            format="%(asctime)s %(name)s %(levelname)s %(message)s",
+            datefmt="%Y-%m-%dT%H:%M:%S",
+        )
+        self.logger = logging.getLogger("AutoSolver")
+
+    class FakeEvent:
+        """Fake event class for the button click event.
+        Instead of using some kind of hacky-way to interact with the
+        Tkinter GUI, here we mock the event object that is passed to
+        the callback function of the button click event.
+        """
+
+        def __init__(self, button):
+            self.widget: MinesweeperTk.CellButton = button
+
+    def _first_move(self):
+        last_index: int = self.game.rows * self.game.columns - 1
+        cell: MinesweeperTk.CellButton = self.game.game_grid[randint(0, last_index)]
+        self.game.open_cell(self.FakeEvent(cell))
+        self.logger.info(f"First move: {cell}")
+
+    def solve(self):
+        # First move
+        self._first_move()
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Minesweeper game")
@@ -67,3 +101,6 @@ if __name__ == "__main__":
         mines=args.mines,
         debug=args.debug,
     )
+
+    autosolver = AutoSolver(game=game, debug=args.debug)
+    autosolver.solve()
