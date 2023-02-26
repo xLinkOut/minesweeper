@@ -145,6 +145,9 @@ class MinesweeperTk(tk.Tk):
         self.first_move: bool = True
         # Track if the game is over or not (used by solver)
         self.finished: bool = False
+        # Track if the game is won or not (used by solver)
+        self.won: bool = False
+
         self.logger.info("Game started")
 
     def _open_single_cell(self, cell: CellButton):
@@ -306,9 +309,11 @@ class MinesweeperTk(tk.Tk):
         """
 
         # Check if all non-bomb cells are opened or all bomb-cell have a flag on it
-        self.finished = all(cell.is_opened for cell in self.game_grid if not cell.has_mine) or \
+        self.won = all(cell.is_opened for cell in self.game_grid if not cell.has_mine) or \
             all(cell.is_flagged for cell in self.game_grid if cell.has_mine)
-        return self.finished
+        if self.won:
+            self.finished = True
+        return self.won
 
     def game_over(self):
         """Show all bombs and disable all cells."""
