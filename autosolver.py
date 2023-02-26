@@ -32,12 +32,13 @@ class AutoSolver:
         last_index: int = self.game.rows * self.game.columns - 1
         cell: MinesweeperTk.CellButton = self.game.game_grid[randint(0, last_index)]
         self.game.open_cell(self.FakeEvent(cell))
-        self.logger.info(f"First move: {cell}")
+        self.logger.debug(f"First move: {cell}")
 
     def _random_move(self):
+        self.logger.info("Using random move")
         cell = choice([cell for cell in self.game.game_grid if not cell.is_opened and not cell.is_flagged])
         self.game.open_cell(self.FakeEvent(cell))
-        self.logger.info(f"Random move: {cell}")
+        self.logger.debug(f"Random move: {cell}")
 
     def _flag_cells(self):
         """Scan game grid to find cells that are safe to flag.
@@ -61,16 +62,16 @@ class AutoSolver:
 
             # Find nearby cells that are not opened
             nearby_closed_cells = [
-                self.game.game_grid[coords[0] * self.game.columns + coords[1]]
-                for coords in self.game.get_nearby_cells_coords(cell.row, cell.column)
-                if not self.game.game_grid[coords[0] * self.game.columns + coords[1]].is_opened
+                nearby_cell
+                for nearby_cell in self.game.get_nearby_cells(cell)
+                if not nearby_cell.is_opened
             ]
 
             if cell.nearby_mines == len(nearby_closed_cells):
                 for nearby_closed_cell in nearby_closed_cells:
                     if not nearby_closed_cell.is_flagged:
                         self.game.put_flag(self.FakeEvent(nearby_closed_cell))
-                        self.logger.info(f"Flagged cell: {nearby_closed_cell}")
+                        self.logger.debug(f"Flagged cell: {nearby_closed_cell}")
 
     def _open_cells(self):
         """Scan game grid to find cells that are safe to be opened.
@@ -84,12 +85,8 @@ class AutoSolver:
             if self.game.finished:
                 break
 
-            # Skip cells that are not opened
-            if not cell.is_opened:
-                continue
-
-            # Skip cells that are flagged
-            if cell.is_flagged:
+            # Skip cells that are not opened or flagged
+            if not cell.is_opened or cell.is_flagged:
                 continue
 
             # Find nearby cells that are flagged
@@ -108,7 +105,7 @@ class AutoSolver:
             for nearby_cell in self.game.get_nearby_cells(cell):
                 if not nearby_cell.is_opened and not nearby_cell.is_flagged:
                     self.game.open_cell(self.FakeEvent(nearby_cell))
-                    self.logger.info(f"Opened cell: {nearby_cell}")
+                    self.logger.debug(f"Opened cell: {nearby_cell}")
 
     def _count_opened_or_flagged_cells(self) -> int:
         """Count the number of opened or flagged cells in the game grid."""
@@ -119,6 +116,7 @@ class AutoSolver:
         """Use mathematical sets-based strategy to overcome difficult situation."""
 
         self.game.update()
+        self.logger.info("Using sets strategy")
         did_something = False
 
         # For each pair of cells in the game grid
@@ -127,18 +125,17 @@ class AutoSolver:
             if self.game.finished:
                 break
 
-            # Skip cells that are not opened
-            if not (cell_a.is_opened and cell_b.is_opened):
+            # Skip pairs where cells:
+            # - are not both opened
+            # - at least one them is flagged
+            # - at least one of them has no nearby mines
+            if (
+                (not (cell_a.is_opened and cell_b.is_opened)) or
+                (cell_a.is_flagged or cell_b.is_flagged) or
+                (cell_a.nearby_mines == 0 or cell_b.nearby_mines == 0)
+            ):
                 continue
 
-            # Skip cells that have no nearby mines
-            if cell_a.nearby_mines == 0 or cell_b.nearby_mines == 0:
-                continue
-
-            # Skip cells that are flagged
-            if cell_a.is_flagged or cell_b.is_flagged:
-                continue
-            
             # Swap cells if cell_b has more nearby mines than cell_a
             if cell_a.nearby_mines < cell_b.nearby_mines:
                 cell_a, cell_b = cell_b, cell_a
@@ -179,13 +176,16 @@ class AutoSolver:
                 for cell in nfn_a_difference_nfn_b:
                     did_something = True
                     self.game.put_flag(self.FakeEvent(cell))
-                    self.logger.info(f"Flagged cell: {cell}")
+                    self.logger.debug(f"Flagged cell: {cell}")
 
                 for cell in nfn_b_difference_nfn_a:
                     did_something = True
                     self.game.open_cell(self.FakeEvent(cell))
-                    self.logger.info(f"Opened cell: {cell}")
+                    self.logger.debug(f"Opened cell: {cell}")
         
+        if did_something:
+            self.game.update()
+            self.logger.info("Sets strategy did something!")
         return did_something
 
     def solve(self):
