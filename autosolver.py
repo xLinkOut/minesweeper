@@ -105,14 +105,38 @@ class AutoSolver:
                     self.game.open_cell(self.FakeEvent(nearby_cell))
                     self.logger.info(f"Opened cell: {nearby_cell}")
 
+    def _count_opened_or_flagged_cells(self) -> int:
+        """Count the number of opened or flagged cells in the game grid."""
+
+        return sum(
+            1
+            for cell in self.game.game_grid
+            if cell.is_opened or cell.is_flagged
+        )
+
     def solve(self):
         # First move
         self._first_move()
 
+        # Track number of opened or flagged cells
+        # so we can detect when the game is stuck
+        opened_or_flagged_cells = self._count_opened_or_flagged_cells()
+
         # While the game is not finished
         while not self.game.finished:
             self._flag_cells()
+            self.game.update()
             self._open_cells()
+            self.game.update()
+
+            # Check if the game is stuck
+            new_opened_or_flagged_cells = self._count_opened_or_flagged_cells()
+            if new_opened_or_flagged_cells == opened_or_flagged_cells:
+                self.logger.warning("Game is stuck")
+                input("Do something...")
+            
+            # Update number of opened or flagged cells
+            opened_or_flagged_cells = new_opened_or_flagged_cells
 
 
 if __name__ == "__main__":
