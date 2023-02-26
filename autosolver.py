@@ -3,7 +3,7 @@
 
 import logging
 from argparse import ArgumentParser
-from random import randint, choice
+from random import choice, randint
 
 from minesweeper import MinesweeperTk
 
@@ -38,7 +38,9 @@ class AutoSolver:
 
     def _random_move(self):
         self.logger.info("Using random move")
-        cell = choice([cell for cell in self.game.game_grid if not cell.is_opened and not cell.is_flagged])
+        cell = choice(
+            [cell for cell in self.game.game_grid if not cell.is_opened and not cell.is_flagged]
+        )
         self.game.open_cell(self.FakeEvent(cell))
         self.logger.debug(f"Random move: {cell}")
 
@@ -64,9 +66,7 @@ class AutoSolver:
 
             # Find nearby cells that are not opened
             nearby_closed_cells = [
-                nearby_cell
-                for nearby_cell in cell.neighbors
-                if not nearby_cell.is_opened
+                nearby_cell for nearby_cell in cell.neighbors if not nearby_cell.is_opened
             ]
 
             if cell.nearby_mines == len(nearby_closed_cells):
@@ -93,9 +93,7 @@ class AutoSolver:
 
             # Find nearby cells that are flagged
             nearby_flagged_cells = [
-                nearby_cell
-                for nearby_cell in cell.neighbors
-                if nearby_cell.is_flagged
+                nearby_cell for nearby_cell in cell.neighbors if nearby_cell.is_flagged
             ]
 
             # Skip cells that do not have the same number of nearby mines
@@ -121,7 +119,9 @@ class AutoSolver:
         did_something = False
 
         # For each pair of cells in the game grid
-        for (cell_a, cell_b) in [pair for pair in zip(self.game.game_grid, self.game.game_grid[1:])]:
+        for (cell_a, cell_b) in [
+            pair for pair in zip(self.game.game_grid, self.game.game_grid[1:])
+        ]:
             # Game is finished, no need to continue (recursion safe)
             if self.game.finished:
                 break
@@ -131,9 +131,9 @@ class AutoSolver:
             # - at least one them is flagged
             # - at least one of them has no nearby mines
             if (
-                (not (cell_a.is_opened and cell_b.is_opened)) or
-                (cell_a.is_flagged or cell_b.is_flagged) or
-                (cell_a.nearby_mines == 0 or cell_b.nearby_mines == 0)
+                (not (cell_a.is_opened and cell_b.is_opened))
+                or (cell_a.is_flagged or cell_b.is_flagged)
+                or (cell_a.nearby_mines == 0 or cell_b.nearby_mines == 0)
             ):
                 continue
 
@@ -169,7 +169,7 @@ class AutoSolver:
             # cells of cell_a and cell_b, then:
             # - flag all cells in the difference between the sets of nfn_a and nfn_b
             # - open all cells in the difference between the sets of nfn_b and nfn_a
-            
+
             nfn_a_difference_nfn_b = set(nfn_a).difference(set(nfn_b))
             nfn_b_difference_nfn_a = set(nfn_b).difference(set(nfn_a))
 
@@ -201,7 +201,7 @@ class AutoSolver:
             self._flag_cells()
             if self.debug:
                 self.game.update()
-            
+
             self._open_cells()
             if self.debug:
                 self.game.update()
@@ -223,7 +223,7 @@ class AutoSolver:
             self.logger.info("Game won!")
         else:
             self.logger.info("Game lost!")
-        
+
         return self.game.won
 
 

@@ -42,7 +42,7 @@ class MinesweeperTk(tk.Tk):
             self.is_flagged: bool = False
             self.nearby_mines: int = 0
             self.neighbors: list[self.CellButton] = []
-        
+
         def __str__(self) -> str:
             return (
                 f"Cell ({self.row}, {self.column}): "
@@ -52,7 +52,7 @@ class MinesweeperTk(tk.Tk):
                 f"is flagged: {self.is_flagged}, "
                 f"has {len(self.neighbors)} neighbors"
             )
-        
+
         def __repr__(self) -> str:
             return (
                 f"Cell ({self.row}, {self.column}, {self.nearby_mines}, "
@@ -131,7 +131,7 @@ class MinesweeperTk(tk.Tk):
                 button.grid(row=i, column=j)
                 # Add button to game grid
                 self.game_grid.append(button)
-        
+
         # Each cell has a list of its neighbors, so we don't have to calculate it every time
         for cell in self.game_grid:
             cell.neighbors = self.get_nearby_cells(cell)
@@ -309,8 +309,9 @@ class MinesweeperTk(tk.Tk):
         """
 
         # Check if all non-bomb cells are opened or all bomb-cell have a flag on it
-        self.won = all(cell.is_opened for cell in self.game_grid if not cell.has_mine) or \
-            all(cell.is_flagged for cell in self.game_grid if cell.has_mine)
+        self.won = all(cell.is_opened for cell in self.game_grid if not cell.has_mine) or all(
+            cell.is_flagged for cell in self.game_grid if cell.has_mine
+        )
         if self.won:
             self.finished = True
         return self.won
@@ -360,9 +361,7 @@ class MinesweeperTk(tk.Tk):
 
         # If cell has no nearby mines, open all cells around it
         if cell.nearby_mines == 0:
-            self.logger.debug(
-                f"open_cell ({cell.row}, {cell.column}): opening nearby cells"
-            )
+            self.logger.debug(f"open_cell ({cell.row}, {cell.column}): opening nearby cells")
             self.open_nearby_cells(cell)
         else:
             self._open_single_cell(cell)
@@ -384,7 +383,7 @@ class MinesweeperTk(tk.Tk):
         Args:
             event (Event[CellButton]): cell button (right) click event.
         """
-        
+
         # Get cell from event, just for convenience
         cell: self.CellButton = event.widget
 
@@ -397,16 +396,12 @@ class MinesweeperTk(tk.Tk):
 
         # If cell is already opened, do nothing
         if cell.is_opened:
-            self.logger.debug(
-                f"put_flag ({cell.row}, {cell.column}): is already opened"
-            )
+            self.logger.debug(f"put_flag ({cell.row}, {cell.column}): is already opened")
             return
 
         # Toggle flag on cell
         cell.is_flagged = not cell.is_flagged
-        cell.configure(
-            image=self.sprite_flag if cell.is_flagged else self.sprite_blank
-        )
+        cell.configure(image=self.sprite_flag if cell.is_flagged else self.sprite_blank)
         cell["state"] = "disabled" if cell.is_flagged else "normal"
         self.logger.debug(
             f"put_flag ({cell.row}, {cell.column}): {'flagged' if cell.is_flagged else 'unflagged'}"
@@ -432,15 +427,11 @@ class MinesweeperTk(tk.Tk):
         cell: self.CellButton = event.widget
 
         if cell.is_flagged:
-            self.logger.debug(
-                f"chording ({cell.row}, {cell.column}): has flag on it"
-            )
+            self.logger.debug(f"chording ({cell.row}, {cell.column}): has flag on it")
             return
 
         if cell.nearby_mines == 0:
-            self.logger.debug(
-                f"chording ({cell.row}, {cell.column}): has no nearby mines"
-            )
+            self.logger.debug(f"chording ({cell.row}, {cell.column}): has no nearby mines")
             return
 
         nearby_flags: int = sum(1 for cell in cell.neighbors if cell.is_flagged)
@@ -457,19 +448,21 @@ class MinesweeperTk(tk.Tk):
 
                 if nearby_cell.is_flagged:
                     continue
-                
+
                 if nearby_cell.has_mine:
                     self.game_over()
                     if not self.non_interactive:
                         msgbox.showinfo("Game over!", "BOOM! 💥")
                     return
-                
+
                 if nearby_cell.nearby_mines == 0:
                     self.open_nearby_cells(nearby_cell)
                 else:
                     self._open_single_cell(nearby_cell)
-                    self.logger.debug(f"chording ({nearby_cell.row}, {nearby_cell.column}): opened")
-        
+                    self.logger.debug(
+                        f"chording ({nearby_cell.row}, {nearby_cell.column}): opened"
+                    )
+
         # Check if player won
         if self.check_win():
             self.game_over()
@@ -479,7 +472,7 @@ class MinesweeperTk(tk.Tk):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Minesweeper game")
-    
+
     grid_size = parser.add_argument_group("Grid size")
     grid_size.add_argument(
         "-d",
@@ -533,7 +526,11 @@ if __name__ == "__main__":
 
     # Create a window with Tkinter
     window = MinesweeperTk(
-        difficulty=args.difficulty, rows=args.rows, columns=args.columns, mines=args.mines, debug=args.debug
+        difficulty=args.difficulty,
+        rows=args.rows,
+        columns=args.columns,
+        mines=args.mines,
+        debug=args.debug,
     )
     # Show window
     window.mainloop()
