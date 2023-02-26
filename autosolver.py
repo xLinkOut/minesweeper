@@ -9,7 +9,49 @@ from minesweeper import MinesweeperTk
 
 
 class AutoSolver:
+    """AutoSolver class for the Minesweeper game.
+
+    The AutoSolver tries to solve the game by using a combination of strategies.
+
+    A bit of terminology:
+        - a 'cell' is a button in the game grid.;
+        - each cell has 8 'nearby cells' (or neighbors) in its 3x3 grid;
+        - consequentially, a 'nearby cell' is a cell that is adjacent to (touch) another cell.
+        - a cell is 'opened' if the user (or the AutoSolver) 'step' on it;
+        - a cell is 'flagged' if there is a flag on it, and can't be opened (until is 'unflagged');
+        - a cell is 'closed' if it is not opened and not flagged;
+        - a cell value is the number ([0, 8]) of nearby mines, that is the number of nearby cells
+            that are mines, and is only visible after the cell is opened;
+        - a cell is 'safe to be opened' if it is closed and it is 'completed', that is, if it has
+            the same number of nearby mines (its value) as the number of nearby flagged cells;
+
+    After the first move, the AutoSolver will use the following strategies:
+        * Scan the game grid to find cells that are safe to flag
+        * Scan the game grid to find cells that are safe to be opened
+        * Repeat the above two strategies until grid is completed or a deadlock is reached
+        * If a deadlock is reached, use a mathematical sets-based strategy to solve the situation.
+        * If neither of the above strategies can solve the game, use a random move and hope for the best.
+
+    Those strategies are based on the two following observation:
+        1. If a cell has the same number of nearby mines as the number of closed cells around it,
+            then all of those cells need to be flagged. In other words, if a cell’s value equals its
+            neighbors count, those neighbors are mines. E.g.: if a cell has value 3, and there are 3
+            closed cells around it, then all of those cells need to be flagged.
+        2. If a cell has the same number of nearby mines as the number of flagged cells around it,
+            then all of those cells are safe to be opened. In other words, if a cell’s value equals
+            its flagged neighbors count, those neighbors are safe to be opened. E.g.: if a cell has
+            value 3, and there are 3 flagged cells around it, then all the other nearby cells are
+            safe to be opened.
+    """
+
     def __init__(self, game: MinesweeperTk, debug: bool = False):
+        """Constructor for the AutoSolver class.
+
+        Args:
+            game (MinesweeperTk): a Minesweeper game instance.
+            debug (bool, optional): toggle debug mode. Defaults to False.
+        """
+
         self.game: MinesweeperTk = game
         self.debug: bool = debug
 
@@ -27,7 +69,7 @@ class AutoSolver:
         the callback function of the button click event.
         """
 
-        def __init__(self, button):
+        def __init__(self, button: MinesweeperTk.CellButton):
             self.widget: MinesweeperTk.CellButton = button
 
     def _first_move(self):
