@@ -433,10 +433,7 @@ class MinesweeperTk(tk.Tk):
             )
             return
 
-        nearby_flags: int = 0
-        for nearby_cell in cell.neighbors:
-            if nearby_cell.is_flagged:
-                nearby_flags += 1
+        nearby_flags: int = sum(1 for cell in cell.neighbors if cell.is_flagged)
 
         self.logger.debug(
             f"chording ({cell.row}, {cell.column}): found {nearby_flags} nearby flags"
