@@ -3,7 +3,7 @@
 
 import logging
 from argparse import ArgumentParser
-from random import randint
+from random import randint, choice
 
 from minesweeper import MinesweeperTk
 
@@ -33,6 +33,11 @@ class AutoSolver:
         cell: MinesweeperTk.CellButton = self.game.game_grid[randint(0, last_index)]
         self.game.open_cell(self.FakeEvent(cell))
         self.logger.info(f"First move: {cell}")
+
+    def _random_move(self):
+        cell = choice([cell for cell in self.game.game_grid if not cell.is_opened and not cell.is_flagged])
+        self.game.open_cell(self.FakeEvent(cell))
+        self.logger.info(f"Random move: {cell}")
 
     def _flag_cells(self):
         """Scan game grid to find cells that are safe to flag.
@@ -199,15 +204,14 @@ class AutoSolver:
             self.game.update()
 
             # Check if the game is stuck
-            new_opened_or_flagged_cells = self._count_opened_or_flagged_cells()
-            if new_opened_or_flagged_cells == opened_or_flagged_cells:
+            if opened_or_flagged_cells == self._count_opened_or_flagged_cells():
                 self.logger.warning("Game is stuck, using another strategy")
                 if not self._sets_strategy():
-                    self.logger.warning("Game is stuck, giving up")
-                    break
+                    self.logger.warning("Game is stuck, random move")
+                    self._random_move()
 
             # Update number of opened or flagged cells
-            opened_or_flagged_cells = new_opened_or_flagged_cells
+            opened_or_flagged_cells = self._count_opened_or_flagged_cells()
 
 
 if __name__ == "__main__":
