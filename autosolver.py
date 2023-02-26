@@ -63,7 +63,7 @@ class AutoSolver:
             # Find nearby cells that are not opened
             nearby_closed_cells = [
                 nearby_cell
-                for nearby_cell in self.game.get_nearby_cells(cell)
+                for nearby_cell in cell.neighbors
                 if not nearby_cell.is_opened
             ]
 
@@ -92,7 +92,7 @@ class AutoSolver:
             # Find nearby cells that are flagged
             nearby_flagged_cells = [
                 nearby_cell
-                for nearby_cell in self.game.get_nearby_cells(cell)
+                for nearby_cell in cell.neighbors
                 if nearby_cell.is_flagged
             ]
 
@@ -102,7 +102,7 @@ class AutoSolver:
                 continue
 
             # Open all nearby cells that are not flagged and not opened
-            for nearby_cell in self.game.get_nearby_cells(cell):
+            for nearby_cell in cell.neighbors:
                 if not nearby_cell.is_opened and not nearby_cell.is_flagged:
                     self.game.open_cell(self.FakeEvent(nearby_cell))
                     self.logger.debug(f"Opened cell: {nearby_cell}")
@@ -143,24 +143,24 @@ class AutoSolver:
             # Non flagged (and not opened) nearby cells of cell_a
             nfn_a = [
                 nearby_cell
-                for nearby_cell in self.game.get_nearby_cells(cell_a)
+                for nearby_cell in cell_a.neighbors
                 if not nearby_cell.is_flagged and not nearby_cell.is_opened
             ]
 
             # Non flagged (and not opened) nearby cells of cell_b
             nfn_b = [
                 nearby_cell
-                for nearby_cell in self.game.get_nearby_cells(cell_b)
+                for nearby_cell in cell_b.neighbors
                 if not nearby_cell.is_flagged and not nearby_cell.is_opened
             ]
 
             # Recalculate nearby mines of cell_a and cell_b subtracting the number of nearby
             # flagged cells
             nearby_mines_a = cell_a.nearby_mines - sum(
-                1 for cell in self.game.get_nearby_cells(cell_a) if cell.is_flagged
+                1 for cell in cell_a.neighbors if cell.is_flagged
             )
             nearby_mines_b = cell_b.nearby_mines - sum(
-                1 for cell in self.game.get_nearby_cells(cell_b) if cell.is_flagged
+                1 for cell in cell_b.neighbors if cell.is_flagged
             )
 
             # If the difference between the number of nearby mines of cell_a and cell_b
