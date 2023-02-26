@@ -67,6 +67,44 @@ class AutoSolver:
                         self.game.put_flag(self.FakeEvent(nearby_closed_cell))
                         self.logger.info(f"Flagged cell: {nearby_closed_cell}")
 
+    def _open_cells(self):
+        """Scan game grid to find cells that are safe to be opened.
+
+        If a cell has the same number of nearby mines as the number of flagged cells around it,
+        then all of those cells are safe to be opened.
+        """
+
+        for cell in self.game.game_grid:
+            # Game is finished, no need to continue (recursion safe)
+            if self.game.finished:
+                break
+
+            # Skip cells that are not opened
+            if not cell.is_opened:
+                continue
+
+            # Skip cells that are flagged
+            if cell.is_flagged:
+                continue
+
+            # Find nearby cells that are flagged
+            nearby_flagged_cells = [
+                nearby_cell
+                for nearby_cell in self.game.get_nearby_cells(cell)
+                if nearby_cell.is_flagged
+            ]
+
+            # Skip cells that do not have the same number of nearby mines
+            # as the number of nearby flagged cells
+            if cell.nearby_mines != len(nearby_flagged_cells):
+                continue
+
+            # Open all nearby cells that are not flagged and not opened
+            for nearby_cell in self.game.get_nearby_cells(cell):
+                if not nearby_cell.is_opened and not nearby_cell.is_flagged:
+                    self.game.open_cell(self.FakeEvent(nearby_cell))
+                    self.logger.info(f"Opened cell: {nearby_cell}")
+
     def solve(self):
         # First move
         self._first_move()
@@ -74,6 +112,7 @@ class AutoSolver:
         # While the game is not finished
         while not self.game.finished:
             self._flag_cells()
+            self._open_cells()
 
 
 if __name__ == "__main__":
