@@ -78,13 +78,18 @@ class AutoSolver:
         self.game.open_cell(self.FakeEvent(cell))
         self.logger.debug(f"First move: {cell}")
 
-    def _random_move(self):
-        self.logger.info("Using random move")
+    def _open_random_cell(self):
+        """Open a random cell.
+
+        This is a fallback strategy in case the other strategies fail. Also used
+        to start the game, since the first move is always random.
+        """
+        
         cell = choice(
             [cell for cell in self.game.game_grid if not cell.is_opened and not cell.is_flagged]
         )
         self.game.open_cell(self.FakeEvent(cell))
-        self.logger.debug(f"Random move: {cell}")
+        self.logger.debug(f"open_random_cell: {cell}")
 
     def _flag_cells(self):
         """Scan game grid to find cells that are safe to flag.
@@ -253,7 +258,7 @@ class AutoSolver:
                 self.logger.warning("Game is stuck, using another strategy")
                 if not self._sets_strategy():
                     self.logger.warning("Game is stuck, random move")
-                    self._random_move()
+                    self._open_random_cell()
 
             # Update number of opened or flagged cells
             opened_or_flagged_cells = self._count_opened_or_flagged_cells()
