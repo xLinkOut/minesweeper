@@ -44,6 +44,16 @@ class AutoSolver:
             safe to be opened.
     """
 
+    class FakeEvent:
+        """Fake event class for the button click event.
+        Instead of using some kind of hacky-way to interact with the
+        Tkinter GUI, here we mock the event object that is passed to
+        the callback function of the button click event.
+        """
+
+        def __init__(self, button: MinesweeperTk.CellButton):
+            self.widget: MinesweeperTk.CellButton = button
+
     def __init__(self, game: MinesweeperTk, debug: bool = False):
         """Constructor for the AutoSolver class.
 
@@ -62,29 +72,13 @@ class AutoSolver:
         )
         self.logger = logging.getLogger("AutoSolver")
 
-    class FakeEvent:
-        """Fake event class for the button click event.
-        Instead of using some kind of hacky-way to interact with the
-        Tkinter GUI, here we mock the event object that is passed to
-        the callback function of the button click event.
-        """
-
-        def __init__(self, button: MinesweeperTk.CellButton):
-            self.widget: MinesweeperTk.CellButton = button
-
-    def _first_move(self):
-        last_index: int = self.game.rows * self.game.columns - 1
-        cell: MinesweeperTk.CellButton = self.game.game_grid[randint(0, last_index)]
-        self.game.open_cell(self.FakeEvent(cell))
-        self.logger.debug(f"First move: {cell}")
-
     def _open_random_cell(self):
         """Open a random cell.
 
         This is a fallback strategy in case the other strategies fail. Also used
         to start the game, since the first move is always random.
         """
-        
+
         cell = choice(
             [cell for cell in self.game.game_grid if not cell.is_opened and not cell.is_flagged]
         )
@@ -237,7 +231,7 @@ class AutoSolver:
 
     def solve(self):
         # First move
-        self._first_move()
+        self._open_random_cell()
 
         # Track number of opened or flagged cells
         # so we can detect when the game is stuck
