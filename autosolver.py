@@ -275,6 +275,7 @@ if __name__ == "__main__":
         columns=args.columns,
         mines=args.mines,
         debug=args.debug,
+        non_interactive=True,
     )
 
     autosolver = AutoSolver(game=game, debug=args.debug)

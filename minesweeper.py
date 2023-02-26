@@ -66,6 +66,7 @@ class MinesweeperTk(tk.Tk):
         columns: Optional[int] = None,
         mines: Optional[int] = None,
         debug: bool = False,
+        non_interactive: bool = False,
     ):
         """Minesweeper game class constructor.
 
@@ -93,6 +94,7 @@ class MinesweeperTk(tk.Tk):
         self.columns: int = columns or self.CONFIG[difficulty]["columns"]
         self.mines: int = mines or self.CONFIG[difficulty]["mines"]
         self.logger.info(f"Game grid: {self.rows}x{self.columns} with {self.mines} mines")
+        self.non_interactive: bool = non_interactive
 
         # Set window title
         self.title("Minesweeper")
@@ -347,7 +349,8 @@ class MinesweeperTk(tk.Tk):
             self.logger.debug(f"open_cell ({cell.row}, {cell.column}): has a mine")
             cell.configure(image=self.sprite_bomb)
             self.game_over()
-            msgbox.showinfo("Game over!", "BOOM! 💥")
+            if not self.non_interactive:
+                msgbox.showinfo("Game over!", "BOOM! 💥")
             return
 
         # If cell has no nearby mines, open all cells around it
@@ -363,7 +366,8 @@ class MinesweeperTk(tk.Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            msgbox.showinfo("You won!", "Congratulations! 🎉")
+            if not self.non_interactive:
+                msgbox.showinfo("You won!", "Congratulations! 🎉")
 
     def put_flag(self, event: tk.Event):
         """Put a flag on a cell. If it's the first move, do nothing.
@@ -406,7 +410,8 @@ class MinesweeperTk(tk.Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            msgbox.showinfo("You won!", "Congratulations! 🎉")
+            if not self.non_interactive:
+                msgbox.showinfo("You won!", "Congratulations! 🎉")
 
     def chording(self, event: tk.Event):
         """Chording is a technique used to open cells around a cell with a number on it.
@@ -450,7 +455,8 @@ class MinesweeperTk(tk.Tk):
                 
                 if nearby_cell.has_mine:
                     self.game_over()
-                    msgbox.showinfo("Game over!", "BOOM! 💥")
+                    if not self.non_interactive:
+                        msgbox.showinfo("Game over!", "BOOM! 💥")
                     return
                 
                 if nearby_cell.nearby_mines == 0:
@@ -462,7 +468,8 @@ class MinesweeperTk(tk.Tk):
         # Check if player won
         if self.check_win():
             self.game_over()
-            msgbox.showinfo("You won!", "Congratulations! 🎉")
+            if not self.non_interactive:
+                msgbox.showinfo("You won!", "Congratulations! 🎉")
 
 
 if __name__ == "__main__":
