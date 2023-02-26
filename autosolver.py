@@ -196,6 +196,10 @@ class AutoSolver:
                 1 for cell in cell_b.neighbors if cell.is_flagged
             )
 
+            # If, after the subtraction, both cells have no nearby mines, skip the pair
+            if nearby_mines_a == 0 and nearby_mines_b == 0:
+                continue
+
             # Nearby cells of cell_a that are not flagged and not opened (nfn_a)
             non_flagged_neighbors_a: set[self.game.CellButton] = {
                 nearby_cell
@@ -209,6 +213,10 @@ class AutoSolver:
                 for nearby_cell in cell_b.neighbors
                 if not nearby_cell.is_flagged and not nearby_cell.is_opened
             }
+
+            # If nfn_a and nfn_b are equal, skip the pair
+            if non_flagged_neighbors_a == non_flagged_neighbors_b:
+                continue
 
             # If the difference between the number of nearby mines of cell_a and cell_b is equal to
             # the size of the difference between nfn_a and nfn_b (|nfn_a \ nfn_b|), then:
