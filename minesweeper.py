@@ -41,6 +41,7 @@ class MinesweeperTk(tk.Tk):
             self.is_opened: bool = False
             self.is_flagged: bool = False
             self.nearby_mines: int = 0
+            self.neighbors: list[self.CellButton] = []
         
         def __str__(self) -> str:
             return (
@@ -48,7 +49,8 @@ class MinesweeperTk(tk.Tk):
                 f"{self.nearby_mines} mines nearby, "
                 f"has mine: {self.has_mine}, "
                 f"is opened: {self.is_opened}, "
-                f"is flagged: {self.is_flagged}"
+                f"is flagged: {self.is_flagged}, "
+                f"has {len(self.neighbors)} neighbors"
             )
         
         def __repr__(self) -> str:
@@ -127,6 +129,11 @@ class MinesweeperTk(tk.Tk):
                 button.grid(row=i, column=j)
                 # Add button to game grid
                 self.game_grid.append(button)
+        
+        # Each cell has a list of its neighbors, so we don't have to calculate it every time
+        for cell in self.game_grid:
+            cell.neighbors = self.get_nearby_cells(cell)
+
         self.logger.debug(f"Grid built with {self.rows} rows and {self.columns} columns")
 
         # Center window
