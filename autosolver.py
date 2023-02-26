@@ -108,11 +108,80 @@ class AutoSolver:
     def _count_opened_or_flagged_cells(self) -> int:
         """Count the number of opened or flagged cells in the game grid."""
 
-        return sum(
-            1
-            for cell in self.game.game_grid
-            if cell.is_opened or cell.is_flagged
-        )
+        return sum(1 for cell in self.game.game_grid if cell.is_opened or cell.is_flagged)
+
+    def _sets_strategy(self):
+        """Use mathematical sets-based strategy to overcome difficult situation."""
+
+        self.game.update()
+        did_something = False
+
+        # For each pair of cells in the game grid
+        for (cell_a, cell_b) in [pair for pair in zip(self.game.game_grid, self.game.game_grid[1:])]:
+            # Game is finished, no need to continue (recursion safe)
+            if self.game.finished:
+                break
+
+            # Skip cells that are not opened
+            if not (cell_a.is_opened and cell_b.is_opened):
+                continue
+
+            # Skip cells that have no nearby mines
+            if cell_a.nearby_mines == 0 or cell_b.nearby_mines == 0:
+                continue
+
+            # Skip cells that are flagged
+            if cell_a.is_flagged or cell_b.is_flagged:
+                continue
+            
+            # Swap cells if cell_b has more nearby mines than cell_a
+            if cell_a.nearby_mines < cell_b.nearby_mines:
+                cell_a, cell_b = cell_b, cell_a
+
+            # Non flagged (and not opened) nearby cells of cell_a
+            nfn_a = [
+                nearby_cell
+                for nearby_cell in self.game.get_nearby_cells(cell_a)
+                if not nearby_cell.is_flagged and not nearby_cell.is_opened
+            ]
+
+            # Non flagged (and not opened) nearby cells of cell_b
+            nfn_b = [
+                nearby_cell
+                for nearby_cell in self.game.get_nearby_cells(cell_b)
+                if not nearby_cell.is_flagged and not nearby_cell.is_opened
+            ]
+
+            # Recalculate nearby mines of cell_a and cell_b subtracting the number of nearby
+            # flagged cells
+            nearby_mines_a = cell_a.nearby_mines - sum(
+                1 for cell in self.game.get_nearby_cells(cell_a) if cell.is_flagged
+            )
+            nearby_mines_b = cell_b.nearby_mines - sum(
+                1 for cell in self.game.get_nearby_cells(cell_b) if cell.is_flagged
+            )
+
+            # If the difference between the number of nearby mines of cell_a and cell_b
+            # is equal to the size of the difference between the sets of non flagged nearby
+            # cells of cell_a and cell_b, then:
+            # - flag all cells in the difference between the sets of nfn_a and nfn_b
+            # - open all cells in the difference between the sets of nfn_b and nfn_a
+            
+            nfn_a_difference_nfn_b = set(nfn_a).difference(set(nfn_b))
+            nfn_b_difference_nfn_a = set(nfn_b).difference(set(nfn_a))
+
+            if nearby_mines_a - nearby_mines_b == len(nfn_a_difference_nfn_b):
+                for cell in nfn_a_difference_nfn_b:
+                    did_something = True
+                    self.game.put_flag(self.FakeEvent(cell))
+                    self.logger.info(f"Flagged cell: {cell}")
+
+                for cell in nfn_b_difference_nfn_a:
+                    did_something = True
+                    self.game.open_cell(self.FakeEvent(cell))
+                    self.logger.info(f"Opened cell: {cell}")
+        
+        return did_something
 
     def solve(self):
         # First move
@@ -132,9 +201,11 @@ class AutoSolver:
             # Check if the game is stuck
             new_opened_or_flagged_cells = self._count_opened_or_flagged_cells()
             if new_opened_or_flagged_cells == opened_or_flagged_cells:
-                self.logger.warning("Game is stuck")
-                input("Do something...")
-            
+                self.logger.warning("Game is stuck, using another strategy")
+                if not self._sets_strategy():
+                    self.logger.warning("Game is stuck, giving up")
+                    break
+
             # Update number of opened or flagged cells
             opened_or_flagged_cells = new_opened_or_flagged_cells
 
