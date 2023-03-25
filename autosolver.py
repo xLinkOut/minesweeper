@@ -241,6 +241,7 @@ class AutoSolver:
 
     def solve(self):
         # First move
+        # self.game.open_cell(self.FakeEvent(self.game.game_grid[0]))
         self._open_random_cell()
 
         # Track number of opened or flagged cells
@@ -318,6 +319,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-s",
+        "--seed",
+        type=int,
+        default=None,
+        help="Seed used for random mines placement",
+    )
+
+    parser.add_argument(
         "-n",
         type=int,
         default=1,
@@ -352,6 +361,7 @@ if __name__ == "__main__":
             mines=args.mines,
             debug=args.debug,
             non_interactive=True,
+            seed=args.seed,
         )
 
         autosolver = AutoSolver(game=game, debug=args.debug)

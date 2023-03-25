@@ -3,12 +3,12 @@
 
 import logging
 import os
+import random
+import time
 import tkinter as tk
 import tkinter.messagebox as msgbox
 from argparse import ArgumentParser
-from random import randint
 from typing import Optional
-
 
 class MinesweeperTk(tk.Tk):
     """Minesweeper game class. Extends tkinter.Tk."""
@@ -67,6 +67,7 @@ class MinesweeperTk(tk.Tk):
         mines: Optional[int] = None,
         debug: bool = False,
         non_interactive: bool = False,
+        seed: Optional[int] = None,
     ):
         """Minesweeper game class constructor.
 
@@ -95,6 +96,13 @@ class MinesweeperTk(tk.Tk):
         self.mines: int = mines or self.CONFIG[difficulty]["mines"]
         self.logger.info(f"Game grid: {self.rows}x{self.columns} with {self.mines} mines")
         self.non_interactive: bool = non_interactive
+
+        # Seed
+        if not seed:
+            self.logger.debug(f"No seed provided, using current timestamp as seed")
+        self.seed = seed or int(time.time())
+        random.seed(self.seed)
+        self.logger.info(f"Seed: {self.seed}")
 
         # Set window title
         self.title("Minesweeper")
@@ -237,7 +245,7 @@ class MinesweeperTk(tk.Tk):
 
         # Place bombs
         for i in range(self.mines):
-            x, y = randint(0, self.rows - 1), randint(0, self.columns - 1)
+            x, y = random.randint(0, self.rows - 1), random.randint(0, self.columns - 1)
             # If bomb is placed on the first move cell or in it's nearby (3x3) cells, or
             # bomb is placed on another bomb, try again
             while (
@@ -245,7 +253,7 @@ class MinesweeperTk(tk.Tk):
                 or (x, y) in genesis_cell_nearby_cells
                 or self.game_grid[x * self.columns + y].has_mine
             ):
-                x, y = randint(0, self.rows - 1), randint(0, self.columns - 1)
+                x, y = random.randint(0, self.rows - 1), random.randint(0, self.columns - 1)
             # Place bomb
             self.game_grid[x * self.columns + y].has_mine = True
             self.logger.debug(f"Placed bomb at ({x}, {y})")
@@ -503,6 +511,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-s",
+        "--seed",
+        type=int,
+        default=None,
+        help="Seed used for random mines placement",
+    )
+
+    parser.add_argument(
         "--debug",
         action="store_true",
         default=False,
@@ -531,6 +547,7 @@ if __name__ == "__main__":
         columns=args.columns,
         mines=args.mines,
         debug=args.debug,
+        seed=args.seed,
     )
     # Show window
     window.mainloop()
